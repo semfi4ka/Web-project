@@ -5,87 +5,104 @@
 <head>
     <title>Cocktail Details</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
-
-    <style>
-        .cocktail-container {
-            width: 600px;
-            margin: 50px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .ingredients-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .ingredients-list li {
-            padding: 5px 0;
-            border-bottom: 1px solid #eee;
-        }
-
-        /* Контейнер для кнопок */
-        .button-row {
-            display: flex;
-            align-items: center;
-            margin-top: 20px;
-        }
-
-        /* Back — растягивается */
-        .button-back {
-            flex: 1;
-            margin-right: 10px;
-        }
-
-        /* Delete — маленькая */
-        .button-delete {
-            width: 100px;
-            padding: 10px;
-        }
-    </style>
 </head>
 <body>
 
-<div class="cocktail-container">
-
-    <h2>${cocktail.name}</h2>
-
-    <p><strong>Description:</strong> ${cocktail.description}</p>
-    <p><strong>Author:</strong> ${authorName}</p>
-    <p><strong>Created at:</strong> ${cocktail.createdAt}</p>
-
-    <h3>Ingredients:</h3>
-    <ul class="ingredients-list">
-        <c:forEach var="ingredient" items="${ingredients}">
-            <li>${ingredient}</li>
-        </c:forEach>
-    </ul>
-
-    <!-- Кнопки -->
-    <div class="button-row">
-
-        <!-- Back -->
-        <a href="${pageContext.request.contextPath}/welcome"
-           class="button button-back">
-            Back
+<div class="topbar">
+    <div class="container row space">
+        <a class="brand" href="${pageContext.request.contextPath}/welcome">
+            <span class="logo"></span>
+            <span>CocktailHub</span>
         </a>
 
-        <!-- Delete только для ADMIN -->
-        <c:if test="${currentUser.role == 'ADMIN'}">
-            <form action="${pageContext.request.contextPath}/delete"
-                  method="post" style="margin:0;">
+        <div class="nav row">
+            <a href="${pageContext.request.contextPath}/welcome">Главная</a>
+
+            <c:if test="${not empty currentUser}">
+                <a href="${pageContext.request.contextPath}/add">Добавить</a>
+            </c:if>
+
+            <c:choose>
+                <c:when test="${not empty currentUser}">
+                    <form action="${pageContext.request.contextPath}/logout" method="post" style="margin:0;">
+                        <button class="btn secondary small" type="submit">Logout</button>
+                    </form>
+                </c:when>
+                <c:otherwise>
+                    <a href="${pageContext.request.contextPath}/login" class="btn small">Login</a>
+                </c:otherwise>
+            </c:choose>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="row space">
+        <a class="btn secondary" href="${pageContext.request.contextPath}/welcome">← Back</a>
+
+        <!-- Delete только ADMIN -->
+        <c:if test="${not empty currentUser and currentUser.role == 'ADMIN'}">
+            <form action="${pageContext.request.contextPath}/delete" method="post" style="margin:0;">
                 <input type="hidden" name="id" value="${cocktail.id}">
-                <button type="submit"
-                        class="button danger button-delete"
+                <button type="submit" class="btn danger"
                         onclick="return confirm('Delete cocktail?');">
                     Delete
                 </button>
             </form>
         </c:if>
+    </div>
+
+    <div class="card p20 mt18">
+
+        <h1>${cocktail.name}</h1>
+        <div class="muted mt8">${cocktail.description}</div>
+
+        <div class="mt12">
+            <span class="badge">Author: ${authorName}</span>
+            <span class="badge">Created: ${cocktail.createdAt}</span>
+        </div>
+
+        <div class="mt18">
+            <h2>Ingredients</h2>
+            <ul class="ingredients">
+                <c:forEach var="ingredient" items="${ingredients}">
+                    <li>${ingredient}</li>
+                </c:forEach>
+            </ul>
+        </div>
 
     </div>
+
+    <!-- ⭐ Rating + Comment — только авторизованные -->
+    <c:if test="${not empty currentUser}">
+        <div class="card p20 mt18">
+            <h2>Rate & Comment</h2>
+
+            <form method="post" action="${pageContext.request.contextPath}/rate" class="mt12">
+                <input type="hidden" name="cocktailId" value="${cocktail.id}">
+                <div class="row">
+                    <select name="rating" class="select">
+                        <option value="1">1 ★</option>
+                        <option value="2">2 ★★</option>
+                        <option value="3">3 ★★★</option>
+                        <option value="4">4 ★★★★</option>
+                        <option value="5">5 ★★★★★</option>
+                    </select>
+                    <button class="btn" type="submit">Submit</button>
+                </div>
+            </form>
+
+            <form method="post" action="${pageContext.request.contextPath}/comment" class="mt12">
+                <input type="hidden" name="cocktailId" value="${cocktail.id}">
+                <div class="row">
+                    <input class="input" name="text" placeholder="Write comment...">
+                    <button class="btn" type="submit">Send</button>
+                </div>
+            </form>
+
+        </div>
+    </c:if>
 
 </div>
 

@@ -3,111 +3,78 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Approve Cocktails</title>
+    <title>Add Cocktail</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
-    <style>
-        .container {
-            width: 700px;
-            margin: 50px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th, td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #f2f2f2;
-        }
-
-        .button {
-            padding: 5px 10px;
-            margin-right: 5px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            color: white;
-        }
-
-        .approve {
-            background-color: #2ecc71;
-        }
-
-        .reject {
-            background-color: #e74c3c;
-        }
-
-        .button:hover {
-            opacity: 0.8;
-        }
-
-        a.cocktail-link {
-            color: #2980b9;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        a.cocktail-link:hover {
-            text-decoration: underline;
-        }
-    </style>
 </head>
 <body>
-<div class="container">
-    <h2>Cocktails Pending Approval</h2>
 
-    <c:if test="${empty pendingCocktails}">
-        <p>No cocktails pending moderation.</p>
-    </c:if>
-
-    <c:if test="${not empty pendingCocktails}">
-        <table>
-            <tr>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Author</th>
-                <th>Created At</th>
-                <th>Actions</th>
-            </tr>
-            <c:forEach var="cocktail" items="${pendingCocktails}">
-                <tr>
-                    <td>
-                        <a class="cocktail-link" href="${pageContext.request.contextPath}/view?id=${cocktail.id}">
-                                ${cocktail.name}
-                        </a>
-                    </td>
-                    <td>${cocktail.description}</td>
-                    <td>${cocktail.author.username}</td>
-                    <td>${cocktail.createdAt}</td>
-                    <td>
-                        <form action="${pageContext.request.contextPath}/approve" method="post" style="display:inline;">
-                            <input type="hidden" name="cocktailId" value="${cocktail.id}">
-                            <input type="hidden" name="action" value="approve">
-                            <button class="button approve" type="submit">Approve</button>
-                        </form>
-                        <form action="${pageContext.request.contextPath}/approve" method="post" style="display:inline;">
-                            <input type="hidden" name="cocktailId" value="${cocktail.id}">
-                            <input type="hidden" name="action" value="reject">
-                            <button class="button reject" type="submit">Reject</button>
-                        </form>
-                    </td>
-                </tr>
-            </c:forEach>
-        </table>
-    </c:if>
-
-    <a href="${pageContext.request.contextPath}/welcome" class="button" style="background-color:#3498db;">Back</a>
+<div class="topbar">
+    <div class="container row space">
+        <a class="brand" href="${pageContext.request.contextPath}/welcome">
+            <span class="logo"></span>
+            <span>CocktailHub</span>
+        </a>
+        <div class="nav row">
+            <a href="${pageContext.request.contextPath}/welcome">Главная</a>
+            <a href="${pageContext.request.contextPath}/profile">Личный кабинет</a>
+        </div>
+    </div>
 </div>
+
+<div class="page">
+    <div class="card panel">
+        <div class="row space">
+            <div>
+                <h1>${currentUser.role == 'CLIENT' ? 'Offer a cocktail' : 'Add a cocktail'}</h1>
+                <div class="muted mt8">Заполни форму и добавь ингредиенты</div>
+            </div>
+            <a class="btn secondary" href="${pageContext.request.contextPath}/welcome">← Back</a>
+        </div>
+
+        <div class="divider"></div>
+
+        <form action="${pageContext.request.contextPath}/add" method="post" style="display:grid; gap:10px;">
+            <label class="small">Name</label>
+            <input class="input" type="text" name="name" required>
+
+            <label class="small">Description</label>
+            <textarea name="description" placeholder="Short description..."></textarea>
+
+            <h2 class="mt12">Ingredients</h2>
+            <div id="ingredients-container">
+                <div class="ingredient-row">
+                    <input class="input" type="text" name="ingredientName" placeholder="Ingredient Name" required>
+                    <input class="input" type="text" name="ingredientAmount" placeholder="Amount">
+                    <input class="input" type="text" name="ingredientUnit" placeholder="Unit">
+                </div>
+            </div>
+
+            <button class="btn mt12" type="submit">
+                ${currentUser.role == 'CLIENT' ? 'Offer a cocktail' : 'Add Cocktail'}
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const container = document.getElementById('ingredients-container');
+
+    container.addEventListener('input', () => {
+        const lastRow = container.lastElementChild;
+        const inputs = lastRow.querySelectorAll('input');
+
+        let anyFilled = false;
+        inputs.forEach(input => { if (input.value.trim() !== '') anyFilled = true; });
+
+        if (anyFilled) {
+            const newRow = lastRow.cloneNode(true);
+            newRow.querySelectorAll('input').forEach(i => i.value = '');
+            const nameInput = newRow.querySelector('input[name="ingredientName"]');
+            if (nameInput) nameInput.required = false;
+            container.appendChild(newRow);
+        }
+    });
+</script>
+
 </body>
 </html>

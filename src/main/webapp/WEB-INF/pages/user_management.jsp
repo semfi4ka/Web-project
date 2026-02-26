@@ -5,110 +5,70 @@
 <head>
     <title>User Management</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
-    <style>
-        .user-management-container {
-            width: 700px;
-            margin: 50px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
-        }
-
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th, td {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
-        }
-
-        th {
-            background: #f2f2f2;
-        }
-
-        .button {
-            padding: 6px 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            color: white;
-            margin-right: 5px;
-        }
-
-        .button.promote {
-            background: #4CAF50;
-        }
-
-        .button.promote:hover {
-            background: #45a049;
-        }
-
-        .button.demote {
-            background: #f44336;
-        }
-
-        .button.demote:hover {
-            background: #d32f2f;
-        }
-
-        .back-button {
-            margin-top: 20px;
-        }
-    </style>
 </head>
 <body>
 
-<div class="user-management-container">
-    <h2>User Management</h2>
+<div class="topbar">
+    <div class="container row space">
+        <a class="brand" href="${pageContext.request.contextPath}/welcome">
+            <span class="logo"></span>
+            <span>CocktailHub</span>
+        </a>
+        <div class="nav row">
+            <a href="${pageContext.request.contextPath}/welcome">Главная</a>
+            <a href="${pageContext.request.contextPath}/profile">Личный кабинет</a>
+        </div>
+    </div>
+</div>
 
-    <table>
-        <tr>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Cocktails</th>
-            <th>Actions</th>
-        </tr>
-        <c:forEach var="user" items="${userList}">
+<div class="page">
+    <div class="card panel">
+        <div class="row space">
+            <div>
+                <h1>User Management</h1>
+                <div class="muted mt8">Повышай/понижай роли пользователей</div>
+            </div>
+            <a class="btn secondary" href="${pageContext.request.contextPath}/welcome">← Back</a>
+        </div>
+
+        <table class="table">
             <tr>
-                <td>${user.username}</td>
-                <td>${user.email}</td>
-                <td>${user.role}</td>
-                <td>${user.cocktailCount}</td>
-                <td>
-                    <c:if test="${user.role == 'CLIENT'}">
-                        <form style="display:inline;" method="post" action="${pageContext.request.contextPath}/admin/users">
-                            <input type="hidden" name="userId" value="${user.id}" />
-                            <input type="hidden" name="action" value="promote" />
-                            <button class="button promote" type="submit">Promote</button>
-                        </form>
-                    </c:if>
-                    <c:if test="${user.role == 'BARTENDER'}">
-                        <form style="display:inline;" method="post" action="${pageContext.request.contextPath}/admin/users">
-                            <input type="hidden" name="userId" value="${user.id}" />
-                            <input type="hidden" name="action" value="demote" />
-                            <button class="button demote" type="submit">Demote</button>
-                        </form>
-                    </c:if>
-                </td>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Cocktails</th>
+                <th style="width:220px;">Actions</th>
             </tr>
-        </c:forEach>
-    </table>
 
-    <form action="${pageContext.request.contextPath}/welcome" method="get" class="back-button">
-        <button class="button" type="submit">Back</button>
-    </form>
+            <c:forEach var="user" items="${userList}">
+                <tr>
+                    <td>${user.username}</td>
+                    <td>${user.email}</td>
+                    <td><span class="badge">${user.role}</span></td>
+                    <td>${user.cocktailCount}</td>
+                    <td>
+                        <div class="row" style="gap:8px;">
+                            <c:if test="${user.role == 'CLIENT'}">
+                                <form style="margin:0;" method="post" action="${pageContext.request.contextPath}/admin/users">
+                                    <input type="hidden" name="userId" value="${user.id}" />
+                                    <input type="hidden" name="action" value="promote" />
+                                    <button class="btn ok small" type="submit">Promote</button>
+                                </form>
+                            </c:if>
+
+                            <c:if test="${user.role == 'BARTENDER'}">
+                                <form style="margin:0;" method="post" action="${pageContext.request.contextPath}/admin/users">
+                                    <input type="hidden" name="userId" value="${user.id}" />
+                                    <input type="hidden" name="action" value="demote" />
+                                    <button class="btn danger small" type="submit">Demote</button>
+                                </form>
+                            </c:if>
+                        </div>
+                    </td>
+                </tr>
+            </c:forEach>
+        </table>
+    </div>
 </div>
 
 </body>

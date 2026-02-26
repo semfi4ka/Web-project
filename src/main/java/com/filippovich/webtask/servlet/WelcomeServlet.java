@@ -25,29 +25,29 @@ public class WelcomeServlet extends HttpServlet {
     public static final String PAGE_WELCOME = "WEB-INF/pages/welcome.jsp";
     public static final String ATTR_CURRENT_USER = "currentUser";
     public static final String ATTR_COCKTAIL_LIST = "cocktailList";
-    public static final String LOGIN_REDIRECT = "login";
     public static final String APPROVED_STATUS = "APPROVED";
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        User currentUser = (User) req.getSession().getAttribute(ATTR_CURRENT_USER);
-        if (currentUser == null) {
-            logger.warn("Unauthorized access attempt to welcome page");
-            resp.sendRedirect(LOGIN_REDIRECT);
-            return;
-        }
 
-        req.setAttribute(ATTR_CURRENT_USER, currentUser);
-        logger.info("Welcome page accessed by user: {}", currentUser.getEmail());
+        User currentUser = (User) req.getSession().getAttribute(ATTR_CURRENT_USER);
 
         CocktailServiceImpl cocktailService = new CocktailServiceImpl(ConnectionDataSource.getDataSource());
+
         List<Cocktail> cocktails;
         try {
             cocktails = cocktailService.getCocktailsByStatus(APPROVED_STATUS);
-            logger.info("Retrieved {} approved cocktails for welcome page", cocktails.size());
+            logger.info("Loaded {} approved cocktails", cocktails.size());
         } catch (ServiceException e) {
-            logger.error("Error retrieving cocktails for user {}", currentUser.getEmail(), e);
+            logger.error("Error retrieving cocktails", e);
             throw new ServletException("Failed to load cocktails", e);
+        }
+
+        if (currentUser != null) {
+            req.setAttribute(ATTR_CURRENT_USER, currentUser);
+            logger.info("Welcome page accessed by user: {}", currentUser.getEmail());
+        } else {
+            logger.info("Welcome page accessed by GUEST");
         }
 
         req.setAttribute(ATTR_COCKTAIL_LIST, cocktails);

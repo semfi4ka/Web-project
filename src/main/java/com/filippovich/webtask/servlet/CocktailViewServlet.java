@@ -29,21 +29,15 @@ public class CocktailViewServlet extends HttpServlet {
     public static final String ATTR_AUTHOR_NAME = "authorName";
     public static final String ATTR_INGREDIENTS = "ingredients";
     public static final String PAGE_WELCOME = "/welcome";
-    public static final String LOGIN_URL = "/login";
     public static final String ID_PARAMETER = "id";
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
         User currentUser = (User) req.getSession().getAttribute(ATTR_CURRENT_USER);
-        if (currentUser == null) {
-            logger.warn("Unauthorized access attempt to view cocktail. Redirecting to login.");
-            resp.sendRedirect(req.getContextPath() + LOGIN_URL);
-            return;
-        }
 
         String cocktailIdParam = req.getParameter(ID_PARAMETER);
         if (cocktailIdParam == null) {
-            logger.warn("No cocktail ID provided by user '{}'. Redirecting to welcome page.", currentUser.getEmail());
             resp.sendRedirect(req.getContextPath() + PAGE_WELCOME);
             return;
         }
@@ -52,7 +46,6 @@ public class CocktailViewServlet extends HttpServlet {
         try {
             cocktailId = Long.parseLong(cocktailIdParam);
         } catch (NumberFormatException e) {
-            logger.warn("Invalid cocktail ID '{}' provided by user '{}'. Redirecting to welcome page.", cocktailIdParam, currentUser.getEmail());
             resp.sendRedirect(req.getContextPath() + PAGE_WELCOME);
             return;
         }
@@ -62,7 +55,6 @@ public class CocktailViewServlet extends HttpServlet {
         try {
             var optionalCocktail = cocktailService.getCocktailById(cocktailId);
             if (optionalCocktail.isEmpty()) {
-                logger.warn("Cocktail with ID '{}' not found for user '{}'. Redirecting to welcome page.", cocktailId, currentUser.getEmail());
                 resp.sendRedirect(req.getContextPath() + PAGE_WELCOME);
                 return;
             }
@@ -74,13 +66,17 @@ public class CocktailViewServlet extends HttpServlet {
             req.setAttribute(ATTR_COCKTAIL, cocktail);
             req.setAttribute(ATTR_AUTHOR_NAME, authorName);
             req.setAttribute(ATTR_INGREDIENTS, ingredients);
-            req.setAttribute(ATTR_CURRENT_USER, currentUser);
 
-            logger.info("User '{}' is viewing cocktail '{}' (ID {}).", currentUser.getEmail(), cocktail.getName(), cocktail.getId());
+            if (currentUser != null) {
+                req.setAttribute(ATTR_CURRENT_USER, currentUser);
+                logger.info("User '{}' is viewing cocktail '{}'", currentUser.getEmail(), cocktail.getName());
+            } else {
+                logger.info("GUEST is viewing cocktail '{}'", cocktail.getName());
+            }
+
             req.getRequestDispatcher(PAGE_VIEW).forward(req, resp);
 
         } catch (ServiceException e) {
-            logger.error("Error retrieving cocktail data for cocktail ID '{}' by user '{}'.", cocktailId, currentUser.getEmail(), e);
             throw new ServletException("Error retrieving cocktail data", e);
         }
     }

@@ -5,79 +5,61 @@
 <head>
     <title>Add Cocktail</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
-    <style>
-        .welcome-container {
-            width: 600px;
-            margin: 50px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .ingredient-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .ingredient-row input {
-            flex: 1;
-            padding: 5px;
-        }
-
-        button {
-            margin-top: 10px;
-        }
-
-        .button {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 6px 12px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-        .button:hover {
-            background-color: #2980b9;
-        }
-    </style>
 </head>
 <body>
 
-<div class="welcome-container">
-    <h2>${currentUser.role == 'CLIENT' ? 'Offer a cocktail' : 'Add a cocktail'}</h2>
+<div class="topbar">
+    <div class="container row space">
+        <a class="brand" href="${pageContext.request.contextPath}/welcome">
+            <span class="logo"></span>
+            <span>CocktailHub</span>
+        </a>
+        <div class="nav row">
+            <a href="${pageContext.request.contextPath}/welcome">Главная</a>
+            <a href="${pageContext.request.contextPath}/profile">Личный кабинет</a>
+        </div>
+    </div>
+</div>
 
-    <form action="${pageContext.request.contextPath}/add" method="post">
-        <label>Name:</label>
-        <input type="text" name="name" required><br><br>
-
-        <label>Description:</label>
-        <textarea name="description" rows="3" style="width:100%;"></textarea><br><br>
-
-        <h3>Ingredients:</h3>
-        <div id="ingredients-container">
-            <div class="ingredient-row">
-                <input type="text" name="ingredientName" placeholder="Ingredient Name" required>
-                <input type="text" name="ingredientAmount" placeholder="Amount">
-                <input type="text" name="ingredientUnit" placeholder="Unit">
+<div class="page">
+    <div class="card panel">
+        <div class="row space">
+            <div>
+                <h1>${currentUser.role == 'CLIENT' ? 'Offer a cocktail' : 'Add a cocktail'}</h1>
+                <div class="muted mt8">Заполни форму и добавь ингредиенты</div>
             </div>
+            <a class="btn secondary" href="${pageContext.request.contextPath}/welcome">← Back</a>
         </div>
 
-        <button type="submit">${currentUser.role == 'CLIENT' ? 'Offer a cocktail' : 'Add Cocktail'}</button>
-    </form>
+        <div class="divider"></div>
 
-    <a href="${pageContext.request.contextPath}/welcome" class="button">Back</a>
+        <form action="${pageContext.request.contextPath}/add" method="post" style="display:grid; gap:10px;">
+            <label class="small">Name</label>
+            <input class="input" type="text" name="name" required>
+
+            <label class="small">Description</label>
+            <textarea name="description" placeholder="Short description..."></textarea>
+
+            <h2 class="mt12">Ingredients</h2>
+            <div id="ingredients-container">
+                <div class="ingredient-row">
+                    <input class="input" type="text" name="ingredientName" placeholder="Ingredient Name" required>
+                    <input class="input" type="text" name="ingredientAmount" placeholder="Amount">
+                    <input class="input" type="text" name="ingredientUnit" placeholder="Unit">
+                </div>
+            </div>
+
+            <button class="btn mt12" type="submit">
+                ${currentUser.role == 'CLIENT' ? 'Offer a cocktail' : 'Add Cocktail'}
+            </button>
+        </form>
+    </div>
 </div>
 
 <script>
     const container = document.getElementById('ingredients-container');
 
-    container.addEventListener('input', (e) => {
+    container.addEventListener('input', () => {
         const lastRow = container.lastElementChild;
         const inputs = lastRow.querySelectorAll('input');
 
@@ -87,7 +69,8 @@
         if (anyFilled) {
             const newRow = lastRow.cloneNode(true);
             newRow.querySelectorAll('input').forEach(i => i.value = '');
-            newRow.querySelector('input[name="ingredientName"]').required = false;
+            const nameInput = newRow.querySelector('input[name="ingredientName"]');
+            if (nameInput) nameInput.required = false;
             container.appendChild(newRow);
         }
     });
