@@ -3,54 +3,64 @@ package com.filippovich.webtask.servlet;
 import com.filippovich.webtask.connection.ConnectionDataSource;
 import com.filippovich.webtask.exception.ServiceException;
 import com.filippovich.webtask.model.Cocktail;
-import com.filippovich.webtask.model.User;
 import com.filippovich.webtask.service.impl.CocktailServiceImpl;
+import com.filippovich.webtask.service.impl.FeedbackServiceImpl;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import jakarta.servlet.http.*;
+import jakarta.servlet.RequestDispatcher;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.OptionalDouble;
 
-@WebServlet(WelcomeServlet.URL_MAPPING)
+@WebServlet("/welcome")
 public class WelcomeServlet extends HttpServlet {
 
-    private static final Logger logger = LogManager.getLogger(WelcomeServlet.class);
-
-    public static final String URL_MAPPING = "/welcome";
-    public static final String PAGE_WELCOME = "WEB-INF/pages/welcome.jsp";
-    public static final String ATTR_CURRENT_USER = "currentUser";
-    public static final String ATTR_COCKTAIL_LIST = "cocktailList";
-    public static final String APPROVED_STATUS = "APPROVED";
-
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
-        User currentUser = (User) req.getSession().getAttribute(ATTR_CURRENT_USER);
-
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         CocktailServiceImpl cocktailService = new CocktailServiceImpl(ConnectionDataSource.getDataSource());
 
-        List<Cocktail> cocktails;
+        // Создаем карту для хранения рейтингов
+        Map<Long, String> ratings = new HashMap<>();
+        List<Cocktail> cocktailList = null;
+
         try {
-            cocktails = cocktailService.getCocktailsByStatus(APPROVED_STATUS);
-            logger.info("Loaded {} approved cocktails", cocktails.size());
-        } catch (ServiceException e) {
-            logger.error("Error retrieving cocktails", e);
-            throw new ServletException("Failed to load cocktails", e);
-        }
+            // Получаем все одобренные коктейли
+            cocktailList = cocktailService.findAllApproved();
 
-        if (currentUser != null) {
-            req.setAttribute(ATTR_CURRENT_USER, currentUser);
-            logger.info("Welcome page accessed by user: {}", currentUser.getEmail());
-        } else {
-            logger.info("Welcome page accessed by GUEST");
-        }
 
-        req.setAttribute(ATTR_COCKTAIL_LIST, cocktails);
-        req.getRequestDispatcher(PAGE_WELCOME).forward(req, resp);
+
+            // Для каждого коктейля получаем средний рейтинг
+            for (Cocktail cocktail : cocktailList) {
+                try {
+                    OptionalDouble avg = cocktailService.getAvgRating(cocktail.getId());
+                    ratings.put(
+                            cocktail.getId(),
+                            avg.isPresent() ? String.format("%.1f", avg.getAsDouble()) : "—"
+                    );
+                } catch (ServiceException e) {
+                    // Логируем ошибку при получении рейтинга
+                    System.err.println("Error getting rating for cocktail ID: " + cocktail.getId());
+                    e.printStackTrace();
+                    ratings.put(cocktail.getId(), "Ошибка");
+                }
+            }
+
+            // Передаем список коктейлей и рейтингов в запрос
+            req.setAttribute("cocktailList", cocktailList);
+            req.setAttribute("ratings", ratings);
+
+            // Перенаправляем на welcome.jsp
+            RequestDispatcher dispatcher = req.getRequestDispatcher("/WEB-INF/pages/welcome.jsp");
+            dispatcher.forward(req, resp);
+
+        } catch (ServiceException | ServletException e) {
+            // Логируем ошибку, если не удалось получить коктейли
+            e.printStackTrace();
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error fetching approved cocktails.");
+        }
     }
 }

@@ -1,6 +1,8 @@
 package com.filippovich.webtask.service.impl;
 
+import com.filippovich.webtask.connection.ConnectionDataSource;
 import com.filippovich.webtask.dao.impl.CocktailDaoImpl;
+import com.filippovich.webtask.dao.impl.RatingDaoImpl;
 import com.filippovich.webtask.exception.DaoException;
 import com.filippovich.webtask.exception.ServiceException;
 import com.filippovich.webtask.model.Cocktail;
@@ -13,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import javax.sql.DataSource;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalDouble;
 
 public class CocktailServiceImpl implements CocktailService {
 
@@ -23,6 +26,25 @@ public class CocktailServiceImpl implements CocktailService {
     public CocktailServiceImpl(DataSource dataSource) {
         this.cocktailDao = new CocktailDaoImpl(dataSource);
         logger.info("CocktailServiceImpl initialized with dataSource");
+    }
+
+    public OptionalDouble getAvgRating(long cocktailId) throws ServiceException {
+        try {
+            RatingDaoImpl ratingDao =
+                    new RatingDaoImpl(ConnectionDataSource.getDataSource());
+            return ratingDao.findAvgRating(cocktailId);
+        } catch (DaoException e) {
+            throw new ServiceException(e);
+        }
+    }
+
+    public List<Cocktail> findAllApproved() throws ServiceException {
+        try {
+            CocktailDaoImpl cocktailDao = new CocktailDaoImpl(ConnectionDataSource.getDataSource());
+            return cocktailDao.findByStatus("APPROVED");
+        } catch (DaoException e) {
+            throw new ServiceException(e);
+        }
     }
 
     @Override
@@ -43,6 +65,14 @@ public class CocktailServiceImpl implements CocktailService {
             return cocktailDao.findByStatus(status);
         } catch (DaoException e) {
             logger.error("Error fetching cocktails by status: {}", status, e);
+            throw new ServiceException(e);
+        }
+    }
+
+    public List<Cocktail> getCocktailsByAuthor(long authorId) throws ServiceException {
+        try {
+            return cocktailDao.findByAuthorId(authorId);
+        } catch (com.filippovich.webtask.exception.DaoException e) {
             throw new ServiceException(e);
         }
     }

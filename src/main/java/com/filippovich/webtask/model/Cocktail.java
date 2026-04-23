@@ -12,6 +12,7 @@ public class Cocktail implements Serializable {
     private CocktailStatus status;
     private User author;
     private LocalDateTime createdAt;
+    private String imagePath;
 
     private List<CocktailIngredient> ingredients = new ArrayList<>();
 
@@ -72,5 +73,13 @@ public class Cocktail implements Serializable {
 
     public void setIngredients(List<CocktailIngredient> ingredients) {
         this.ingredients = ingredients;
+    }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
     }
 }

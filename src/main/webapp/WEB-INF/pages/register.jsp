@@ -8,8 +8,8 @@
 <body>
 
 <div class="form-container">
-    <h2>Registration</h2>
-    <div class="muted mt8">Создай аккаунт и добавляй свои коктейли</div>
+    <h2>Create Account</h2>
+    <div class="muted mt8">Join the community and share your recipes.</div>
 
     <form action="${pageContext.request.contextPath}/register" method="post">
         <input class="input" type="text" name="username" placeholder="Username" required>
@@ -19,7 +19,7 @@
     </form>
 
     <div class="link">
-        <a href="login">Already have an account? Log in</a>
+        <a href="${pageContext.request.contextPath}/login">Already have an account? Log in</a>
     </div>
 </div>
 

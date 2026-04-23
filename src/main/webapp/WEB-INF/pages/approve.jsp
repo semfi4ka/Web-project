@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Add Cocktail</title>
+    <title>Moderation</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 </head>
 <body>
@@ -14,67 +14,94 @@
             <span class="logo"></span>
             <span>CocktailHub</span>
         </a>
+
         <div class="nav row">
-            <a href="${pageContext.request.contextPath}/welcome">Главная</a>
-            <a href="${pageContext.request.contextPath}/profile">Личный кабинет</a>
+            <a href="${pageContext.request.contextPath}/welcome">Home</a>
+
+            <c:if test="${not empty currentUser}">
+                <a href="${pageContext.request.contextPath}/add">Add</a>
+
+                <c:if test="${currentUser.role == 'BARTENDER' or currentUser.role == 'ADMIN'}">
+                    <a href="${pageContext.request.contextPath}/approve">Moderation</a>
+                </c:if>
+
+                <c:if test="${currentUser.role == 'ADMIN'}">
+                    <a href="${pageContext.request.contextPath}/admin/users">Users</a>
+                </c:if>
+
+                <a class="btn ghost small" href="${pageContext.request.contextPath}/profile">Account</a>
+            </c:if>
+
+            <c:if test="${empty currentUser}">
+                <a class="btn ghost small" href="${pageContext.request.contextPath}/login">Log in</a>
+            </c:if>
         </div>
     </div>
 </div>
 
 <div class="page">
-    <div class="card panel">
+    <div class="card panel mt22">
         <div class="row space">
             <div>
-                <h1>${currentUser.role == 'CLIENT' ? 'Offer a cocktail' : 'Add a cocktail'}</h1>
-                <div class="muted mt8">Заполни форму и добавь ингредиенты</div>
+                <h1>Cocktail Moderation</h1>
+                <div class="muted mt8">Review user-submitted recipes with moderation status.</div>
             </div>
-            <a class="btn secondary" href="${pageContext.request.contextPath}/welcome">← Back</a>
+            <a class="btn secondary" href="${pageContext.request.contextPath}/welcome">Back</a>
         </div>
 
         <div class="divider"></div>
 
-        <form action="${pageContext.request.contextPath}/add" method="post" style="display:grid; gap:10px;">
-            <label class="small">Name</label>
-            <input class="input" type="text" name="name" required>
-
-            <label class="small">Description</label>
-            <textarea name="description" placeholder="Short description..."></textarea>
-
-            <h2 class="mt12">Ingredients</h2>
-            <div id="ingredients-container">
-                <div class="ingredient-row">
-                    <input class="input" type="text" name="ingredientName" placeholder="Ingredient Name" required>
-                    <input class="input" type="text" name="ingredientAmount" placeholder="Amount">
-                    <input class="input" type="text" name="ingredientUnit" placeholder="Unit">
-                </div>
+        <c:if test="${empty pendingCocktails}">
+            <div class="card p20">
+                <div class="muted">No cocktails are waiting for moderation.</div>
             </div>
+        </c:if>
 
-            <button class="btn mt12" type="submit">
-                ${currentUser.role == 'CLIENT' ? 'Offer a cocktail' : 'Add Cocktail'}
-            </button>
-        </form>
+        <c:if test="${not empty pendingCocktails}">
+            <table class="table">
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Author</th>
+                    <th>Created At</th>
+                    <th style="width: 220px;">Actions</th>
+                </tr>
+
+                <c:forEach var="cocktail" items="${pendingCocktails}">
+                    <tr>
+                        <td>
+                            <a href="${pageContext.request.contextPath}/view?id=${cocktail.id}" style="font-weight: 700; text-decoration: none;">
+                                ${cocktail.name}
+                            </a>
+                        </td>
+                        <td>${cocktail.description}</td>
+                        <td>
+                            <a href="${pageContext.request.contextPath}/profile?userId=${cocktail.author.id}" class="profile-link">
+                                ${cocktail.author.username}
+                            </a>
+                        </td>
+                        <td>${cocktail.createdAt}</td>
+                        <td>
+                            <div class="row" style="gap: 8px;">
+                                <form action="${pageContext.request.contextPath}/approve" method="post" style="margin: 0;">
+                                    <input type="hidden" name="cocktailId" value="${cocktail.id}">
+                                    <input type="hidden" name="action" value="approve">
+                                    <button class="btn ok small" type="submit">Approve</button>
+                                </form>
+
+                                <form action="${pageContext.request.contextPath}/approve" method="post" style="margin: 0;">
+                                    <input type="hidden" name="cocktailId" value="${cocktail.id}">
+                                    <input type="hidden" name="action" value="reject">
+                                    <button class="btn danger small" type="submit">Reject</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </c:forEach>
+            </table>
+        </c:if>
     </div>
 </div>
-
-<script>
-    const container = document.getElementById('ingredients-container');
-
-    container.addEventListener('input', () => {
-        const lastRow = container.lastElementChild;
-        const inputs = lastRow.querySelectorAll('input');
-
-        let anyFilled = false;
-        inputs.forEach(input => { if (input.value.trim() !== '') anyFilled = true; });
-
-        if (anyFilled) {
-            const newRow = lastRow.cloneNode(true);
-            newRow.querySelectorAll('input').forEach(i => i.value = '');
-            const nameInput = newRow.querySelector('input[name="ingredientName"]');
-            if (nameInput) nameInput.required = false;
-            container.appendChild(newRow);
-        }
-    });
-</script>
 
 </body>
 </html>

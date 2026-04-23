@@ -8,12 +8,12 @@
 <body>
 
 <div class="form-container">
-    <h2>Login</h2>
-    <div class="muted mt8">Войди в аккаунт, чтобы добавлять и оценивать коктейли</div>
+    <h2>Welcome Back</h2>
+    <div class="muted mt8">Sign in to add, rate and discuss cocktails.</div>
 
     <% String error = (String) request.getAttribute("error"); %>
     <% if (error != null) { %>
-    <div class="message error mt12"><%= error %></div>
+    <div class="message error"><%= error %></div>
     <% } %>
 
     <form action="${pageContext.request.contextPath}/login" method="post">
@@ -23,7 +23,7 @@
     </form>
 
     <div class="link">
-        <a href="register">Create account</a>
+        <a href="${pageContext.request.contextPath}/register">Create account</a>
     </div>
 </div>
 

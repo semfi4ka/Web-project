@@ -3,8 +3,10 @@ package com.filippovich.webtask.servlet;
 import com.filippovich.webtask.connection.ConnectionDataSource;
 import com.filippovich.webtask.exception.ServiceException;
 import com.filippovich.webtask.model.Cocktail;
+import com.filippovich.webtask.model.Comment;
 import com.filippovich.webtask.model.User;
 import com.filippovich.webtask.service.impl.CocktailServiceImpl;
+import com.filippovich.webtask.service.impl.FeedbackServiceImpl;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -12,7 +14,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.OptionalDouble;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -60,6 +66,36 @@ public class CocktailViewServlet extends HttpServlet {
             }
 
             Cocktail cocktail = optionalCocktail.get();
+
+            // форматируем даты в строку (JSP не умеет LocalDateTime в fmt:formatDate)
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+            req.setAttribute("cocktailCreatedAt", cocktail.getCreatedAt().format(dtf));
+
+            FeedbackServiceImpl feedbackService = new FeedbackServiceImpl(ConnectionDataSource.getDataSource());
+
+            OptionalDouble avgRating = feedbackService.getAvgRating(cocktail.getId());
+            List<Comment> comments = feedbackService.getComments(cocktail.getId());
+
+            // карта дат комментариев (id -> "dd.MM.yyyy HH:mm")
+            Map<Long, String> commentDates = new HashMap<>();
+            for (Comment c : comments) {
+                if (c.getCreatedAt() != null) {
+                    commentDates.put(c.getId(), c.getCreatedAt().format(dtf));
+                }
+            }
+            req.setAttribute("commentDates", commentDates);
+
+            req.setAttribute("avgRating",
+                    avgRating.isPresent() ? String.format("%.1f", avgRating.getAsDouble()) : "—");
+            req.setAttribute("comments", comments);
+
+            // Моя текущая оценка (чтобы показать "Твоя оценка" и кнопку "Изменить")
+            Integer myRating = null;
+            if (currentUser != null) {
+                myRating = feedbackService.getUserRating(cocktail.getId(), currentUser.getId());
+            }
+            req.setAttribute("myRating", myRating);
+
             String authorName = cocktailService.getAuthorNameById(cocktail.getAuthor().getId());
             List<String> ingredients = cocktailService.getIngredientsByCocktailId(cocktail.getId());
 
