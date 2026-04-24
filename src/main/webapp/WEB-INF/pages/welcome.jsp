@@ -45,10 +45,27 @@
 </div>
 
 <div class="container welcome-page">
+    <div class="card search-panel mt16">
+        <form class="search-form" action="${pageContext.request.contextPath}/welcome" method="get">
+            <div class="search-controls">
+                <input class="input search-input" type="text" name="q" value="${searchQuery}" placeholder="Search cocktails by name">
+                <button class="btn" type="submit">Search</button>
+                <c:if test="${not empty searchQuery}">
+                    <a class="btn secondary" href="${pageContext.request.contextPath}/welcome">Reset</a>
+                </c:if>
+            </div>
+        </form>
+    </div>
+
     <div class="cards">
         <c:if test="${empty cocktailList}">
             <div class="card p20" style="grid-column: span 12;">
-                <div class="muted">No cocktails yet.</div>
+                <div class="muted">
+                    <c:choose>
+                        <c:when test="${searchPerformed}">No cocktails found for your search.</c:when>
+                        <c:otherwise>No cocktails yet.</c:otherwise>
+                    </c:choose>
+                </div>
             </div>
         </c:if>
 

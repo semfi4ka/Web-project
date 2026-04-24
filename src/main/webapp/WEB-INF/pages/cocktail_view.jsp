@@ -147,10 +147,14 @@
         </div>
     </c:if>
 
-    <div class="card p20 mt18">
+    <div class="card p20 mt18" id="cocktail-comments-section">
         <div class="row space">
             <h2>Comments</h2>
-            <span class="badge">Newest first</span>
+            <a class="toolbar-chip toolbar-chip-cycle async-sort-link"
+               data-target="#cocktail-comments-section"
+               href="${pageContext.request.contextPath}/view?id=${cocktail.id}&commentSort=${nextCommentSort}">
+                ${commentSortLabel}
+            </a>
         </div>
 
         <c:if test="${empty comments}">
@@ -228,6 +232,54 @@
             }
         });
     }
+
+    async function replaceSection(link) {
+        const targetSelector = link.dataset.target;
+        if (!targetSelector) return;
+
+        const currentSection = document.querySelector(targetSelector);
+        if (!currentSection) return;
+
+        link.classList.add('is-loading');
+        link.setAttribute('aria-busy', 'true');
+
+        try {
+            const response = await fetch(link.href, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Request failed');
+            }
+
+            const html = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const replacement = doc.querySelector(targetSelector);
+
+            if (!replacement) {
+                throw new Error('Section not found');
+            }
+
+            currentSection.replaceWith(replacement);
+            window.history.replaceState({}, '', link.href);
+        } catch (error) {
+            window.location.href = link.href;
+        } finally {
+            link.classList.remove('is-loading');
+            link.removeAttribute('aria-busy');
+        }
+    }
+
+    document.addEventListener('click', (event) => {
+        const link = event.target.closest('.async-sort-link');
+        if (!link) return;
+
+        event.preventDefault();
+        replaceSection(link);
+    });
 </script>
 
 </body>

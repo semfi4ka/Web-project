@@ -60,7 +60,7 @@
         </div>
     </div>
 
-    <div class="card p20 mt18">
+    <div class="card p20 mt18" id="profile-cocktails-section">
         <div class="row space">
             <h2>
                 <c:choose>
@@ -68,7 +68,14 @@
                     <c:otherwise>${profileUser.username}'s Cocktails</c:otherwise>
                 </c:choose>
             </h2>
-            <span class="badge">${empty profileCocktails ? 0 : profileCocktails.size()} total</span>
+            <div class="row">
+                <a class="toolbar-chip toolbar-chip-cycle async-sort-link"
+                   data-target="#profile-cocktails-section"
+                   href="${pageContext.request.contextPath}/profile?userId=${profileUser.id}&cocktailSort=${nextCocktailSort}&commentSort=${commentSort}">
+                    ${cocktailSortLabel}
+                </a>
+                <span class="badge">${empty profileCocktails ? 0 : profileCocktails.size()} total</span>
+            </div>
         </div>
 
         <c:if test="${empty profileCocktails}">
@@ -84,6 +91,7 @@
             <table class="table">
                 <tr>
                     <th>Name</th>
+                    <th>Avg Rating</th>
                     <th>Status</th>
                     <th>Created</th>
                     <th></th>
@@ -91,6 +99,7 @@
                 <c:forEach var="c" items="${profileCocktails}">
                     <tr>
                         <td><c:out value="${c.name}"/></td>
+                        <td><span class="badge">Rating: ${profileCocktailRatings[c.id]}</span></td>
                         <td><span class="badge"><c:out value="${c.status}"/></span></td>
                         <td class="small">${cocktailDates[c.id]}</td>
                         <td><a class="btn secondary small" href="${pageContext.request.contextPath}/view?id=${c.id}">Open</a></td>
@@ -99,6 +108,49 @@
             </table>
         </c:if>
     </div>
+
+    <c:if test="${isOwnProfile}">
+    <div class="card p20 mt18" id="profile-comments-section">
+        <div class="row space">
+            <h2>My Comments</h2>
+            <div class="row">
+                <a class="toolbar-chip toolbar-chip-cycle async-sort-link"
+                   data-target="#profile-comments-section"
+                   href="${pageContext.request.contextPath}/profile?userId=${profileUser.id}&cocktailSort=${cocktailSort}&commentSort=${nextCommentSort}">
+                    ${commentSortLabel}
+                </a>
+                <span class="badge">${empty profileComments ? 0 : profileComments.size()} total</span>
+            </div>
+        </div>
+
+        <c:if test="${empty profileComments}">
+            <div class="muted mt12">No comments yet.</div>
+        </c:if>
+
+        <c:if test="${not empty profileComments}">
+            <c:forEach var="cm" items="${profileComments}" varStatus="st">
+                <div class="comment mt12">
+                    <div class="head">
+                        <div class="meta-left">
+                            <span class="who"><c:out value="${cm.cocktailName}"/></span>
+                            <c:if test="${not empty cm.rating}">
+                                <span class="badge">Rating: ${cm.rating}</span>
+                            </c:if>
+                            <c:if test="${empty cm.rating}">
+                                <span class="badge">No rating</span>
+                            </c:if>
+                        </div>
+                        <span class="small">${profileCommentDates[st.index]}</span>
+                    </div>
+                    <div class="text"><c:out value="${cm.text}"/></div>
+                    <div class="mt12">
+                        <a class="btn secondary small" href="${pageContext.request.contextPath}/view?id=${cm.cocktailId}">Open cocktail</a>
+                    </div>
+                </div>
+            </c:forEach>
+        </c:if>
+    </div>
+    </c:if>
 
     <c:if test="${isOwnProfile}">
     <div class="card p20 mt18">
@@ -130,39 +182,60 @@
             </table>
         </c:if>
     </div>
-
-    <div class="card p20 mt18">
-        <div class="row space">
-            <h2>My Comments</h2>
-            <span class="badge">${empty myComments ? 0 : myComments.size()} total</span>
-        </div>
-
-        <c:if test="${empty myComments}">
-            <div class="muted mt12">No comments yet.</div>
-        </c:if>
-
-        <c:if test="${not empty myComments}">
-            <c:forEach var="cm" items="${myComments}" varStatus="st">
-                <div class="comment mt12">
-                    <div class="head">
-                        <div class="meta-left">
-                            <span class="who"><c:out value="${cm.cocktailName}"/></span>
-                            <c:if test="${not empty cm.rating}">
-                                <span class="badge">Rating: ${cm.rating}</span>
-                            </c:if>
-                        </div>
-                        <span class="small">${profileCommentDates[st.index]}</span>
-                    </div>
-                    <div class="text"><c:out value="${cm.text}"/></div>
-                    <div class="mt12">
-                        <a class="btn secondary small" href="${pageContext.request.contextPath}/view?id=${cm.cocktailId}">Open cocktail</a>
-                    </div>
-                </div>
-            </c:forEach>
-        </c:if>
-    </div>
     </c:if>
 </div>
+
+<script>
+    (function () {
+        async function replaceSection(link) {
+            const targetSelector = link.dataset.target;
+            if (!targetSelector) return;
+
+            const currentSection = document.querySelector(targetSelector);
+            if (!currentSection) return;
+
+            link.classList.add('is-loading');
+            link.setAttribute('aria-busy', 'true');
+
+            try {
+                const response = await fetch(link.href, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Request failed');
+                }
+
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const replacement = doc.querySelector(targetSelector);
+
+                if (!replacement) {
+                    throw new Error('Section not found');
+                }
+
+                currentSection.replaceWith(replacement);
+                window.history.replaceState({}, '', link.href);
+            } catch (error) {
+                window.location.href = link.href;
+            } finally {
+                link.classList.remove('is-loading');
+                link.removeAttribute('aria-busy');
+            }
+        }
+
+        document.addEventListener('click', function (event) {
+            const link = event.target.closest('.async-sort-link');
+            if (!link) return;
+
+            event.preventDefault();
+            replaceSection(link);
+        });
+    })();
+</script>
 
 </body>
 </html>

@@ -14,6 +14,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +38,7 @@ public class CocktailViewServlet extends HttpServlet {
     public static final String ATTR_INGREDIENTS = "ingredients";
     public static final String PAGE_WELCOME = "/welcome";
     public static final String ID_PARAMETER = "id";
+    public static final String COMMENT_SORT_PARAMETER = "commentSort";
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -74,7 +77,9 @@ public class CocktailViewServlet extends HttpServlet {
             FeedbackServiceImpl feedbackService = new FeedbackServiceImpl(ConnectionDataSource.getDataSource());
 
             OptionalDouble avgRating = feedbackService.getAvgRating(cocktail.getId());
-            List<Comment> comments = feedbackService.getComments(cocktail.getId());
+            String commentSort = normalizeSort(req.getParameter(COMMENT_SORT_PARAMETER));
+            List<Comment> comments = new ArrayList<>(feedbackService.getComments(cocktail.getId()));
+            sortComments(comments, commentSort);
 
             // карта дат комментариев (id -> "dd.MM.yyyy HH:mm")
             Map<Long, String> commentDates = new HashMap<>();
@@ -84,6 +89,9 @@ public class CocktailViewServlet extends HttpServlet {
                 }
             }
             req.setAttribute("commentDates", commentDates);
+            req.setAttribute("commentSort", commentSort);
+            req.setAttribute("commentSortLabel", sortLabel(commentSort));
+            req.setAttribute("nextCommentSort", nextSort(commentSort));
 
             req.setAttribute("avgRating",
                     avgRating.isPresent() ? String.format("%.1f", avgRating.getAsDouble()) : "—");
@@ -115,5 +123,54 @@ public class CocktailViewServlet extends HttpServlet {
         } catch (ServiceException e) {
             throw new ServletException("Error retrieving cocktail data", e);
         }
+    }
+
+    private String normalizeSort(String sort) {
+        if (sort == null || sort.isBlank()) {
+            return "newest";
+        }
+        return switch (sort) {
+            case "oldest", "highest_rating", "lowest_rating" -> sort;
+            default -> "newest";
+        };
+    }
+
+    private String nextSort(String sort) {
+        return switch (sort) {
+            case "newest" -> "oldest";
+            case "oldest" -> "highest_rating";
+            case "highest_rating" -> "lowest_rating";
+            default -> "newest";
+        };
+    }
+
+    private String sortLabel(String sort) {
+        return switch (sort) {
+            case "oldest" -> "Oldest first";
+            case "highest_rating" -> "Highest rating";
+            case "lowest_rating" -> "Lowest rating";
+            default -> "Newest first";
+        };
+    }
+
+    private void sortComments(List<Comment> comments, String sort) {
+        Comparator<Comment> comparator = switch (sort) {
+            case "oldest" -> Comparator.comparing(Comment::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder()));
+            case "highest_rating" -> Comparator
+                    .comparing((Comment comment) -> commentRatingSortableValue(comment.getRating(), true))
+                    .thenComparing(Comment::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder()));
+            case "lowest_rating" -> Comparator
+                    .comparing((Comment comment) -> commentRatingSortableValue(comment.getRating(), false))
+                    .thenComparing(Comment::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder()));
+            default -> Comparator.comparing(Comment::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder()));
+        };
+        comments.sort(comparator);
+    }
+
+    private double commentRatingSortableValue(Integer value, boolean highestFirst) {
+        if (value == null) {
+            return Double.POSITIVE_INFINITY;
+        }
+        return highestFirst ? -value : value;
     }
 }

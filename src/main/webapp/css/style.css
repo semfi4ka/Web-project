@@ -179,6 +179,32 @@ h2 {
     margin: 14px 0;
 }
 
+.search-panel {
+    margin-top: 16px;
+    padding: 18px;
+}
+
+.search-form {
+    display: grid;
+    gap: 14px;
+}
+
+.search-copy {
+    min-width: 220px;
+}
+
+.search-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.search-input {
+    flex: 1;
+    min-width: 240px;
+}
+
 .badge {
     display: inline-flex;
     align-items: center;
@@ -212,6 +238,61 @@ h2 {
     border-color: var(--accent);
     color: var(--accent);
     background: #ffffff;
+}
+
+.toolbar-form {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.toolbar-select {
+    min-width: 160px;
+}
+
+.toolbar-switch {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.toolbar-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 4px 9px;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    background: var(--surface-soft);
+    color: #49535d;
+    text-decoration: none;
+    font-size: 0.79rem;
+    transition: border-color 0.12s ease, background-color 0.12s ease, color 0.12s ease;
+}
+
+.toolbar-chip:hover {
+    border-color: var(--line-strong);
+    background: #ffffff;
+    color: var(--text);
+}
+
+.toolbar-chip-cycle {
+    border-color: var(--line-strong);
+    background: #ffffff;
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.toolbar-chip-cycle:hover {
+    border-color: var(--accent);
+    color: var(--accent-hover);
+}
+
+.toolbar-chip.is-loading {
+    opacity: 0.6;
+    pointer-events: none;
 }
 
 .input,
@@ -650,6 +731,31 @@ textarea:focus {
     .nav { width: 100%; }
 
     .hero { padding: 16px; }
+
+    .search-panel {
+        padding: 16px;
+    }
+
+    .search-controls {
+        width: 100%;
+        align-items: stretch;
+    }
+
+    .search-input {
+        min-width: 100%;
+    }
+
+    .toolbar-form {
+        width: 100%;
+    }
+
+    .toolbar-select {
+        min-width: 100%;
+    }
+
+    .toolbar-switch {
+        width: 100%;
+    }
 
     .detail-layout {
         gap: 16px;
