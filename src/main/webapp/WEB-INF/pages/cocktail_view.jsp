@@ -17,6 +17,7 @@
 
         <div class="nav row">
             <a href="${pageContext.request.contextPath}/welcome">Home</a>
+            <a href="${pageContext.request.contextPath}/bartenders">Bartenders</a>
 
             <c:if test="${not empty currentUser}">
                 <a href="${pageContext.request.contextPath}/add">

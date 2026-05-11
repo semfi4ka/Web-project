@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="jakarta.tags.core" prefix="c" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -11,15 +12,14 @@
     <h2>Welcome Back</h2>
     <div class="muted mt8">Sign in to add, rate and discuss cocktails.</div>
 
-    <% String error = (String) request.getAttribute("error"); %>
-    <% if (error != null) { %>
-    <div class="message error"><%= error %></div>
-    <% } %>
-
     <form action="${pageContext.request.contextPath}/login" method="post">
         <input class="input" type="email" name="email" placeholder="Email" required>
         <input class="input" type="password" name="password" placeholder="Password" required>
         <button class="btn" type="submit">Login</button>
+
+        <c:if test="${not empty message}">
+            <div class="message error">Email or password is incorrect.</div>
+        </c:if>
     </form>
 
     <div class="link">

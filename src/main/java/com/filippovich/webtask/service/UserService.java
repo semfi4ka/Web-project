@@ -13,6 +13,10 @@ public interface UserService {
 
     Optional<User> loginUser(String email, String password) throws ServiceException;
 
+    boolean isUsernameTaken(String username) throws ServiceException;
+
+    boolean isEmailTaken(String email) throws ServiceException;
+
     boolean updateUser(User user) throws ServiceException;
 
     List<User> getAllUsers() throws ServiceException;

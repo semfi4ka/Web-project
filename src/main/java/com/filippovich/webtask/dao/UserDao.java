@@ -7,6 +7,7 @@ import com.filippovich.webtask.exception.DaoException;
 
 public interface UserDao {
     Optional<User> findById(long id)  throws DaoException;
+    Optional<User> findByUsername(String username) throws DaoException;
     Optional<User> findByEmail(String email)  throws DaoException;
     List<User> findAll() throws DaoException;
     boolean save(User user)  throws DaoException;

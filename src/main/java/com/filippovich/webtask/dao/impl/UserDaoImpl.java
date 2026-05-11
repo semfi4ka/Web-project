@@ -27,6 +27,12 @@ public class UserDaoImpl implements UserDao {
         WHERE email = ?
 """;
 
+    private final String SQL_FIND_BY_USERNAME = """
+        SELECT id, username, email, password, role, created_at
+        FROM users
+        WHERE username = ?
+""";
+
     private final String SQL_FIND_ALL = """
         SELECT id, username, email, password, role, created_at
         FROM users
@@ -63,6 +69,26 @@ public class UserDaoImpl implements UserDao {
         } catch (SQLException e) {
             throw new DaoException(e);
         }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<User> findByUsername(String username) throws DaoException {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(SQL_FIND_BY_USERNAME)) {
+
+            preparedStatement.setString(1, username);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return Optional.of(mapUser(resultSet));
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+
         return Optional.empty();
     }
 

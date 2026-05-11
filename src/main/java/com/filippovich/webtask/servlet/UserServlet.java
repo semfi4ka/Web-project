@@ -29,6 +29,12 @@ public class UserServlet extends HttpServlet {
     public static final String PASSWORD_PARAMETER = "password";
     public static final String WELCOME_PAGE = "welcome";
     public static final String MESSAGE_ATTRIBUTE = "message";
+    public static final String SUCCESS_MESSAGE_ATTRIBUTE = "successMessage";
+    public static final String REGISTRATION_ERROR_ATTRIBUTE = "registrationError";
+    public static final String USERNAME_ERROR_ATTRIBUTE = "usernameError";
+    public static final String EMAIL_ERROR_ATTRIBUTE = "emailError";
+    public static final String USERNAME_VALUE_ATTRIBUTE = "usernameValue";
+    public static final String EMAIL_VALUE_ATTRIBUTE = "emailValue";
     public static final String CURRENT_USER_ATTRIBUTE = "currentUser";
 
     private UserServiceImpl userService;
@@ -71,12 +77,31 @@ public class UserServlet extends HttpServlet {
         String password = req.getParameter(PASSWORD_PARAMETER);
 
         try {
+            req.setAttribute(USERNAME_VALUE_ATTRIBUTE, username);
+            req.setAttribute(EMAIL_VALUE_ATTRIBUTE, email);
+
+            boolean hasError = false;
+            if (userService.isUsernameTaken(username)) {
+                req.setAttribute(USERNAME_ERROR_ATTRIBUTE, "Username is already taken.");
+                hasError = true;
+            }
+            if (userService.isEmailTaken(email)) {
+                req.setAttribute(EMAIL_ERROR_ATTRIBUTE, "Email is already taken.");
+                hasError = true;
+            }
+
+            if (hasError) {
+                req.getRequestDispatcher(REGISTER_PAGE).forward(req, resp);
+                logger.warn("Failed registration attempt: username or email already exists");
+                return;
+            }
+
             Optional<User> registeredUser = userService.registerUser(username, email, password);
             if (registeredUser.isPresent()) {
-                req.setAttribute(MESSAGE_ATTRIBUTE, "Registration successful!");
+                req.setAttribute(SUCCESS_MESSAGE_ATTRIBUTE, "Registration successful!");
                 logger.info("New user registered: {}", email);
             } else {
-                req.setAttribute(MESSAGE_ATTRIBUTE, "Error: Email is already in use or registration failed");
+                req.setAttribute(REGISTRATION_ERROR_ATTRIBUTE, "Username or email is already taken.");
                 logger.warn("Failed registration attempt for email: {}", email);
             }
             req.getRequestDispatcher(REGISTER_PAGE).forward(req, resp);

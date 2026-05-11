@@ -240,6 +240,14 @@ h2 {
     background: #ffffff;
 }
 
+.directory-name {
+    font-size: 0.98rem;
+}
+
+.directory-table td:last-child {
+    text-align: right;
+}
+
 .toolbar-form {
     display: inline-flex;
     align-items: center;
@@ -336,6 +344,19 @@ textarea::placeholder {
 textarea:focus {
     outline: none;
     border-color: #99a7b7;
+}
+
+.input.input-error,
+.form-container .input.has-error {
+    border-color: #d34053 !important;
+    background: #fff7f8;
+}
+
+.field-error {
+    margin-top: -4px;
+    color: var(--danger) !important;
+    font-size: 0.82rem;
+    font-weight: 600;
 }
 
 .btn {
@@ -686,7 +707,13 @@ textarea:focus {
 .message.error {
     border-color: #f4c7cf;
     background: #fff4f6;
-    color: var(--danger);
+    color: var(--danger) !important;
+}
+
+.message.success {
+    border-color: #bfe3d0;
+    background: #f2fbf6;
+    color: #146a48 !important;
 }
 
 .table {

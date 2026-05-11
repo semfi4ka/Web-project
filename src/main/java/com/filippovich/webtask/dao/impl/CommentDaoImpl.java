@@ -20,7 +20,6 @@ public class CommentDaoImpl implements CommentDao {
         VALUES (?, ?, ?)
     """;
 
-    // ⭐ подтягиваем рейтинг автора через LEFT JOIN
     private static final String SQL_FIND_BY_COCKTAIL = """
         SELECT cc.id, cc.cocktail_id, cc.text, cc.created_at,
                u.id AS user_id, u.username, u.role,

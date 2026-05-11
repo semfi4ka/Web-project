@@ -28,15 +28,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<User> registerUser(String username, String email, String password) throws ServiceException {
         logger.info("Attempting to register user with email: {}", email);
-        try {
-            Optional<User> existingUser = userDao.findByEmail(email);
-            if (existingUser.isPresent()) {
-                logger.warn("Registration failed: user with email {} already exists", email);
-                return Optional.empty();
-            }
-        } catch (DaoException e) {
-            logger.error("Error checking existing user with email: {}", email, e);
-            throw new ServiceException(e);
+        if (isUsernameTaken(username)) {
+            logger.warn("Registration failed: username {} already exists", username);
+            return Optional.empty();
+        }
+        if (isEmailTaken(email)) {
+            logger.warn("Registration failed: user with email {} already exists", email);
+            return Optional.empty();
         }
 
         User newUser = new User();
@@ -59,6 +57,26 @@ public class UserServiceImpl implements UserService {
         }
 
         return Optional.of(newUser);
+    }
+
+    @Override
+    public boolean isUsernameTaken(String username) throws ServiceException {
+        try {
+            return userDao.findByUsername(username).isPresent();
+        } catch (DaoException e) {
+            logger.error("Error checking existing username: {}", username, e);
+            throw new ServiceException(e);
+        }
+    }
+
+    @Override
+    public boolean isEmailTaken(String email) throws ServiceException {
+        try {
+            return userDao.findByEmail(email).isPresent();
+        } catch (DaoException e) {
+            logger.error("Error checking existing user with email: {}", email, e);
+            throw new ServiceException(e);
+        }
     }
 
     @Override
