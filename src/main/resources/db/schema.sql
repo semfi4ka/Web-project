@@ -37,3 +37,22 @@ CREATE TABLE cocktail_ingredients (
                                       FOREIGN KEY (cocktail_id) REFERENCES cocktails(id),
                                       FOREIGN KEY (ingredient_id) REFERENCES ingredients(id)
 );
+
+CREATE TABLE IF NOT EXISTS blog_posts (
+                                          id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                          title VARCHAR(255) NOT NULL,
+                                          content TEXT NOT NULL,
+                                          author_id BIGINT NOT NULL,
+                                          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                          FOREIGN KEY (author_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS blog_comments (
+                                             id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                             post_id BIGINT NOT NULL,
+                                             user_id BIGINT NOT NULL,
+                                             text TEXT NOT NULL,
+                                             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                             FOREIGN KEY (post_id) REFERENCES blog_posts(id) ON DELETE CASCADE,
+                                             FOREIGN KEY (user_id) REFERENCES users(id)
+);

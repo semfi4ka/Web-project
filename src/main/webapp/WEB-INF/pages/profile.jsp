@@ -18,6 +18,7 @@
         <div class="nav row">
             <a href="${pageContext.request.contextPath}/welcome">Home</a>
             <a href="${pageContext.request.contextPath}/bartenders">Bartenders</a>
+            <a href="${pageContext.request.contextPath}/blog">Blog</a>
 
             <a href="${pageContext.request.contextPath}/add">
                 <c:choose>

@@ -205,6 +205,19 @@ h2 {
     min-width: 240px;
 }
 
+.ad-banner {
+    border: 1px solid var(--line);
+    background: var(--surface);
+    overflow: hidden;
+}
+
+.ad-banner img {
+    display: block;
+    width: 100%;
+    height: clamp(86px, 12vw, 140px);
+    object-fit: cover;
+}
+
 .badge {
     display: inline-flex;
     align-items: center;
@@ -430,6 +443,8 @@ textarea:focus {
 .cocktail {
     grid-column: span 4;
     overflow: hidden;
+    transition: transform 0.14s ease, border-color 0.14s ease, background-color 0.14s ease;
+    will-change: transform;
 }
 
 .cocktail a {
@@ -437,6 +452,13 @@ textarea:focus {
     flex-direction: column;
     height: 100%;
     text-decoration: none;
+}
+
+.cocktail:hover {
+    transform: scale(1.025);
+    border-color: var(--line-strong);
+    background: #ffffff;
+    z-index: 2;
 }
 
 .media {
@@ -515,6 +537,45 @@ textarea:focus {
 
 .rating-badge {
     font-variant-numeric: tabular-nums;
+}
+
+.card-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #2f3942;
+    font-size: 0.82rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.star-rating {
+    position: relative;
+    display: inline-block;
+    width: 80px;
+    height: 18px;
+    line-height: 18px;
+    color: #c3cad2;
+    font-size: 16px;
+    letter-spacing: 0;
+    overflow: hidden;
+}
+
+.star-base,
+.star-fill {
+    display: block;
+    white-space: nowrap;
+}
+
+.star-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    color: var(--accent);
+    overflow: hidden;
+}
+
+.rating-number {
+    min-width: 28px;
+    color: var(--muted);
 }
 
 .open-link {
@@ -664,6 +725,26 @@ textarea:focus {
 .comment .text {
     margin-top: 8px;
     line-height: 1.5;
+}
+
+.blog-form,
+.blog-comment-form {
+    display: grid;
+    gap: 10px;
+}
+
+.blog-post h3 {
+    font-size: 1rem;
+}
+
+.blog-content {
+    color: #2f3942;
+    line-height: 1.65;
+    white-space: pre-wrap;
+}
+
+.blog-comment-form textarea {
+    min-height: 84px;
 }
 
 .form-container {

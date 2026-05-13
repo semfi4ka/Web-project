@@ -29,6 +29,7 @@ public class WelcomeServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         CocktailServiceImpl cocktailService = new CocktailServiceImpl(ConnectionDataSource.getDataSource());
         Map<Long, String> ratings = new HashMap<>();
+        Map<Long, String> ratingStarWidths = new HashMap<>();
 
         try {
             List<Cocktail> cocktailList = new ArrayList<>(cocktailService.findAllApproved());
@@ -50,13 +51,16 @@ public class WelcomeServlet extends HttpServlet {
                             cocktail.getId(),
                             avg.isPresent() ? String.format("%.1f", avg.getAsDouble()) : "-"
                     );
+                    ratingStarWidths.put(cocktail.getId(), avg.isPresent() ? starWidth(avg.getAsDouble()) : "0%");
                 } catch (ServiceException e) {
                     ratings.put(cocktail.getId(), "-");
+                    ratingStarWidths.put(cocktail.getId(), "0%");
                 }
             }
 
             req.setAttribute("cocktailList", cocktailList);
             req.setAttribute("ratings", ratings);
+            req.setAttribute("ratingStarWidths", ratingStarWidths);
             req.setAttribute("searchQuery", req.getParameter(SEARCH_PARAM) == null ? "" : req.getParameter(SEARCH_PARAM));
             req.setAttribute("searchPerformed", !searchQuery.isBlank());
 
@@ -151,6 +155,11 @@ public class WelcomeServlet extends HttpServlet {
                 .replaceAll("[^\\p{L}\\p{Nd}]+", " ")
                 .trim()
                 .replaceAll("\\s+", " ");
+    }
+
+    private String starWidth(double rating) {
+        double roundedToHalf = Math.round(Math.max(0, Math.min(5, rating)) * 2.0d) / 2.0d;
+        return String.format(Locale.US, "%.0f%%", (roundedToHalf / 5.0d) * 100.0d);
     }
 
     private record SearchHit(Cocktail cocktail, int score) {

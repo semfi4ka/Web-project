@@ -18,6 +18,7 @@
         <div class="nav row">
             <a href="${pageContext.request.contextPath}/welcome">Home</a>
             <a href="${pageContext.request.contextPath}/bartenders">Bartenders</a>
+            <a href="${pageContext.request.contextPath}/blog">Blog</a>
 
             <c:if test="${not empty currentUser}">
                 <a href="${pageContext.request.contextPath}/add">
@@ -46,6 +47,10 @@
 </div>
 
 <div class="container welcome-page">
+    <div class="ad-banner mt16">
+        <img src="${pageContext.request.contextPath}/images/ad-banner.svg" alt="Advertisement">
+    </div>
+
     <div class="card search-panel mt16">
         <form class="search-form" action="${pageContext.request.contextPath}/welcome" method="get">
             <div class="search-controls">
@@ -103,8 +108,13 @@
                         <div class="desc"><c:out value="${cocktail.description}"/></div>
 
                         <div class="meta">
-                            <span class="badge rating-badge">Rating: ${ratings[cocktail.id]}</span>
-                            <span class="open-link">View</span>
+                            <span class="card-rating">
+                                <span class="star-rating" aria-label="Rating ${ratings[cocktail.id]} out of 5">
+                                    <span class="star-base">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+                                    <span class="star-fill" style="width: ${ratingStarWidths[cocktail.id]}">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+                                </span>
+                                <span class="rating-number">${ratings[cocktail.id]}</span>
+                            </span>
                         </div>
                     </div>
                 </a>
