@@ -23,6 +23,8 @@ body {
 
 body {
     margin: 0;
+    display: flex;
+    flex-direction: column;
     font-family: "Inter", "Segoe UI", Arial, sans-serif;
     color: var(--text);
     background: var(--bg);
@@ -59,6 +61,71 @@ h2 {
 
 .page {
     padding: 20px 16px 28px;
+}
+
+.container,
+.page,
+.form-container {
+    flex-shrink: 0;
+}
+
+.site-footer {
+    margin-top: auto;
+    border-top: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--muted);
+    padding: 26px 16px;
+    font-size: 0.86rem;
+}
+
+.footer-inner {
+    width: 100%;
+    max-width: var(--max-width);
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 28px;
+}
+
+.footer-about {
+    max-width: 420px;
+}
+
+.footer-brand {
+    display: inline-flex;
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.footer-about p {
+    margin: 8px 0 10px;
+    line-height: 1.55;
+}
+
+.footer-about span {
+    color: #7a838d;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px 14px;
+    flex-wrap: wrap;
+    max-width: 560px;
+}
+
+.footer-links a {
+    color: #3d4650;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+}
+
+.footer-links a:hover {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
 }
 
 .row {
@@ -831,6 +898,15 @@ textarea:focus {
 }
 
 @media (max-width: 700px) {
+    .footer-inner {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .footer-links {
+        justify-content: flex-start;
+    }
+
     .topbar .container {
         padding-top: 8px;
         padding-bottom: 8px;

@@ -53,5 +53,35 @@
     </div>
 </div>
 
+<footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-about">
+            <a class="footer-brand" href="${pageContext.request.contextPath}/welcome">CocktailHub</a>
+            <p>A clean catalog for discovering, publishing and discussing cocktail recipes.</p>
+            <span>Simon, 2026</span>
+        </div>
+
+        <nav class="footer-links" aria-label="Footer navigation">
+            <a href="${pageContext.request.contextPath}/welcome">Home</a>
+            <a href="${pageContext.request.contextPath}/bartenders">Bartenders</a>
+            <a href="${pageContext.request.contextPath}/blog">Blog</a>
+            <c:if test="${not empty currentUser}">
+                <a href="${pageContext.request.contextPath}/add">Add Cocktail</a>
+                <a href="${pageContext.request.contextPath}/profile">Account</a>
+            </c:if>
+            <c:if test="${currentUser.role == 'BARTENDER' or currentUser.role == 'ADMIN'}">
+                <a href="${pageContext.request.contextPath}/approve">Moderation</a>
+            </c:if>
+            <c:if test="${currentUser.role == 'ADMIN'}">
+                <a href="${pageContext.request.contextPath}/admin/users">Users</a>
+            </c:if>
+            <c:if test="${empty currentUser}">
+                <a href="${pageContext.request.contextPath}/login">Log in</a>
+                <a href="${pageContext.request.contextPath}/register">Register</a>
+            </c:if>
+        </nav>
+    </div>
+</footer>
+
 </body>
 </html>
