@@ -3,6 +3,7 @@ package com.filippovich.webtask.dao;
 import com.filippovich.webtask.exception.DaoException;
 import com.filippovich.webtask.model.ProfileRating;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.OptionalDouble;
 
@@ -14,6 +15,10 @@ public interface RatingDao {
     OptionalDouble findAvgRating(long cocktailId) throws DaoException;
 
     OptionalDouble findAvgRatingByAuthor(long authorId) throws DaoException;
+
+    List<Long> findTrendingCocktailIds(LocalDateTime since, int limit) throws DaoException;
+
+    List<Long> findBestCocktailIdsCreatedAfter(LocalDateTime since, int limit) throws DaoException;
 
     Integer findUserRating(long cocktailId, long userId) throws DaoException;
 }

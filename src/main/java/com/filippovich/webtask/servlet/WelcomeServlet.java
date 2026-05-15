@@ -1,6 +1,8 @@
 package com.filippovich.webtask.servlet;
 
 import com.filippovich.webtask.connection.ConnectionDataSource;
+import com.filippovich.webtask.dao.impl.RatingDaoImpl;
+import com.filippovich.webtask.exception.DaoException;
 import com.filippovich.webtask.exception.ServiceException;
 import com.filippovich.webtask.model.Cocktail;
 import com.filippovich.webtask.service.impl.CocktailServiceImpl;
@@ -12,9 +14,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -24,12 +29,14 @@ import java.util.OptionalDouble;
 public class WelcomeServlet extends HttpServlet {
 
     private static final String SEARCH_PARAM = "q";
+    private static final int FEATURED_LIMIT = 3;
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         CocktailServiceImpl cocktailService = new CocktailServiceImpl(ConnectionDataSource.getDataSource());
+        RatingDaoImpl ratingDao = new RatingDaoImpl(ConnectionDataSource.getDataSource());
         Map<Long, String> ratings = new HashMap<>();
-        Map<Long, String> ratingStarWidths = new HashMap<>();
+        Map<Long, List<String>> ratingStars = new HashMap<>();
 
         try {
             List<Cocktail> cocktailList = new ArrayList<>(cocktailService.findAllApproved());
@@ -51,22 +58,41 @@ public class WelcomeServlet extends HttpServlet {
                             cocktail.getId(),
                             avg.isPresent() ? String.format("%.1f", avg.getAsDouble()) : "-"
                     );
-                    ratingStarWidths.put(cocktail.getId(), avg.isPresent() ? starWidth(avg.getAsDouble()) : "0%");
+                    ratingStars.put(cocktail.getId(), buildRatingStars(avg.isPresent() ? avg.getAsDouble() : 0));
                 } catch (ServiceException e) {
                     ratings.put(cocktail.getId(), "-");
-                    ratingStarWidths.put(cocktail.getId(), "0%");
+                    ratingStars.put(cocktail.getId(), buildRatingStars(0));
                 }
             }
 
+            Map<Long, Cocktail> cocktailsById = mapCocktailsById(cocktailList);
+            List<Cocktail> trendingCocktails = Collections.emptyList();
+            List<Cocktail> weeklyBestCocktails = Collections.emptyList();
+            boolean showFeaturedRows = searchQuery.isBlank();
+
+            if (showFeaturedRows) {
+                trendingCocktails = findCocktailsByIds(
+                        cocktailsById,
+                        ratingDao.findTrendingCocktailIds(LocalDateTime.now().minusMonths(1), FEATURED_LIMIT)
+                );
+                weeklyBestCocktails = findCocktailsByIds(
+                        cocktailsById,
+                        ratingDao.findBestCocktailIdsCreatedAfter(LocalDateTime.now().minusWeeks(1), FEATURED_LIMIT)
+                );
+            }
+
             req.setAttribute("cocktailList", cocktailList);
+            req.setAttribute("trendingCocktails", trendingCocktails);
+            req.setAttribute("weeklyBestCocktails", weeklyBestCocktails);
+            req.setAttribute("showFeaturedRows", showFeaturedRows);
             req.setAttribute("ratings", ratings);
-            req.setAttribute("ratingStarWidths", ratingStarWidths);
+            req.setAttribute("ratingStars", ratingStars);
             req.setAttribute("searchQuery", req.getParameter(SEARCH_PARAM) == null ? "" : req.getParameter(SEARCH_PARAM));
             req.setAttribute("searchPerformed", !searchQuery.isBlank());
 
             RequestDispatcher dispatcher = req.getRequestDispatcher("/WEB-INF/pages/welcome.jsp");
             dispatcher.forward(req, resp);
-        } catch (ServiceException | ServletException e) {
+        } catch (DaoException | ServiceException | ServletException e) {
             e.printStackTrace();
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error fetching approved cocktails.");
         }
@@ -157,9 +183,40 @@ public class WelcomeServlet extends HttpServlet {
                 .replaceAll("\\s+", " ");
     }
 
-    private String starWidth(double rating) {
+    private List<String> buildRatingStars(double rating) {
         double roundedToHalf = Math.round(Math.max(0, Math.min(5, rating)) * 2.0d) / 2.0d;
-        return String.format(Locale.US, "%.0f%%", (roundedToHalf / 5.0d) * 100.0d);
+        List<String> stars = new ArrayList<>();
+
+        for (int i = 1; i <= 5; i++) {
+            if (roundedToHalf >= i) {
+                stars.add("full");
+            } else if (roundedToHalf >= i - 0.5d) {
+                stars.add("half");
+            } else {
+                stars.add("empty");
+            }
+        }
+
+        return stars;
+    }
+
+    private Map<Long, Cocktail> mapCocktailsById(List<Cocktail> cocktails) {
+        Map<Long, Cocktail> result = new LinkedHashMap<>();
+        for (Cocktail cocktail : cocktails) {
+            result.put(cocktail.getId(), cocktail);
+        }
+        return result;
+    }
+
+    private List<Cocktail> findCocktailsByIds(Map<Long, Cocktail> cocktailsById, List<Long> ids) {
+        List<Cocktail> result = new ArrayList<>();
+        for (Long id : ids) {
+            Cocktail cocktail = cocktailsById.get(id);
+            if (cocktail != null) {
+                result.add(cocktail);
+            }
+        }
+        return result;
     }
 
     private record SearchHit(Cocktail cocktail, int score) {

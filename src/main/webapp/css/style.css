@@ -16,13 +16,17 @@
     box-sizing: border-box;
 }
 
-html,
+html {
+    min-height: 100%;
+}
+
 body {
     min-height: 100%;
 }
 
 body {
     margin: 0;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     font-family: "Inter", "Segoe UI", Arial, sans-serif;
@@ -146,7 +150,8 @@ h2 {
 .mt8 { margin-top: 8px; }
 .mt12 { margin-top: 12px; }
 .mt16 { margin-top: 16px; }
-.mt18 { margin-top: 18px; }
+.mt18 { margin-top: 18px;
+    margin-bottom: 18px; }
 .mt22 { margin-top: 22px; }
 
 .small {
@@ -184,10 +189,13 @@ h2 {
 }
 
 .logo {
-    width: 20px;
-    height: 20px;
-    border-radius: 0;
-    background: var(--accent);
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    display: block;
+}
+.logotext {
+    font-size: 24px;
 }
 
 .nav {
@@ -502,6 +510,26 @@ textarea:focus {
     margin-top: 16px;
 }
 
+.cocktail-section {
+    margin-top: 22px;
+}
+
+.section-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.cards-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.cards-row .cocktail {
+    grid-column: span 1;
+}
+
 .welcome-page {
     min-height: calc(100vh - 62px);
     padding-bottom: 0;
@@ -616,26 +644,32 @@ textarea:focus {
 }
 
 .star-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 1px;
+    font-size: 16px;
+    letter-spacing: 0;
+}
+
+.rating-star {
     position: relative;
     display: inline-block;
-    width: 80px;
+    width: 15px;
     height: 18px;
     line-height: 18px;
     color: #c3cad2;
-    font-size: 16px;
-    letter-spacing: 0;
     overflow: hidden;
 }
 
-.star-base,
-.star-fill {
-    display: block;
-    white-space: nowrap;
+.rating-star.full {
+    color: var(--accent);
 }
 
-.star-fill {
+.rating-star.half::after {
+    content: "\2605";
     position: absolute;
-    inset: 0 auto 0 0;
+    inset: 0;
+    width: 50%;
     color: var(--accent);
     overflow: hidden;
 }
@@ -893,95 +927,675 @@ textarea:focus {
 
 .table tr:hover td { background: #fafbfc; }
 
-@media (max-width: 980px) {
-    .cocktail { grid-column: span 6; }
-}
+/* ============================================================
+   MOBILE ADAPTIVE — 425 px and below
+   Add at the END of style.css (or import after it)
+   ============================================================ */
 
-@media (max-width: 700px) {
+@media (max-width: 425px) {
+
+    /* ── Topbar / Nav ─────────────────────────────────────── */
+
+    .topbar .container {
+        flex-wrap: wrap;
+        min-height: auto;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        gap: 8px;
+    }
+
+    .brand {
+        flex: 1 0 auto;
+    }
+
+    .logotext {
+        font-size: 18px;
+    }
+
+    .nav {
+        width: 100%;
+        gap: 4px;
+        flex-wrap: wrap;
+    }
+
+    .nav > a:not(.btn),
+    .nav > form > button {
+        font-size: 0.82rem;
+        padding: 5px 8px;
+    }
+
+    .nav .btn.small {
+        height: 30px;
+        font-size: 0.82rem;
+        padding: 0 10px;
+    }
+
+    /* ── Page / Container ─────────────────────────────────── */
+
+    .page {
+        padding: 14px 12px 20px;
+    }
+
+    .container,
+    .page {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    /* ── Hero block ───────────────────────────────────────── */
+
+    .hero {
+        padding: 14px;
+    }
+
+    .hero .row.space {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    h1 {
+        font-size: 1.35rem;
+    }
+
+    h2 {
+        font-size: 1.1rem;
+    }
+
+    /* ── Ad banner ────────────────────────────────────────── */
+
+    .ad-banner img {
+        height: clamp(60px, 22vw, 100px);
+    }
+
+    /* ── Search panel ─────────────────────────────────────── */
+
+    .search-panel {
+        padding: 12px;
+    }
+
+    .search-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-input {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .search-controls .btn {
+        width: 100%;
+    }
+
+    /* ── Section head ─────────────────────────────────────── */
+
+    .section-head {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    /* ── Cards grid ───────────────────────────────────────── */
+
+    .cards {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-top: 12px;
+    }
+
+    .cocktail {
+        grid-column: span 1 !important;
+    }
+
+    .cards-row {
+        grid-template-columns: 1fr;
+    }
+
+    .cards-row .cocktail {
+        grid-column: span 1;
+    }
+
+    /* ── Cocktail card image ──────────────────────────────── */
+
+    .media {
+        height: 190px;
+    }
+
+    /* ── Cocktail detail page ─────────────────────────────── */
+
+    .detail-layout {
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .detail-media-column {
+        width: 100%;
+        flex: 0 0 auto;
+    }
+
+    .detail-media {
+        height: clamp(200px, 56vw, 280px);
+        padding: 10px;
+    }
+
+    .detail-content {
+        min-width: 0;
+    }
+
+    .row.mt22 {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    /* Badges row under cocktail title */
+    .detail-content .row.mt12 {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    /* ── Rating stars ─────────────────────────────────────── */
+
+    .rating-line {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .stars {
+        gap: 4px;
+    }
+
+    .star-btn {
+        width: 36px;
+        height: 36px;
+    }
+
+    /* ── Comments ─────────────────────────────────────────── */
+
+    .comment .head {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+
+    .comment .meta-left {
+        flex-wrap: wrap;
+    }
+
+    /* ── Panel / Card padding ─────────────────────────────── */
+
+    .panel,
+    .p20,
+    .card.p20 {
+        padding: 14px;
+    }
+
+    .p16 {
+        padding: 12px;
+    }
+
+    /* ── Bartenders table ─────────────────────────────────── */
+
+    .table {
+        font-size: 0.84rem;
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table th,
+    .table td {
+        padding: 8px;
+        white-space: nowrap;
+    }
+
+    /* ── Directory table: hide less important columns ─────── */
+
+    .directory-table th:nth-child(4),
+    .directory-table td:nth-child(4) {
+        display: none;
+    }
+
+    /* ── Toolbar / chips ──────────────────────────────────── */
+
+    .toolbar-form {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+    }
+
+    .toolbar-select {
+        min-width: 0;
+        width: 100%;
+    }
+
+    /* ── Buttons in row (Back / Delete) ───────────────────── */
+
+    .row.space.mt22 {
+        justify-content: space-between;
+    }
+
+    /* ── Form container (login / register) ───────────────── */
+
+    .form-container {
+        width: calc(100% - 24px);
+        margin-top: clamp(16px, 5vh, 40px);
+        margin-bottom: clamp(16px, 5vh, 40px);
+        padding: 16px;
+    }
+
+    /* ── Footer ───────────────────────────────────────────── */
+
+    .site-footer {
+        padding: 18px 12px;
+    }
+
     .footer-inner {
         flex-direction: column;
         gap: 16px;
     }
 
-    .footer-links {
-        justify-content: flex-start;
+    .footer-about {
+        max-width: 100%;
     }
+
+    .footer-links {
+        max-width: 100%;
+        justify-content: flex-start;
+        gap: 6px 12px;
+    }
+
+    /* ── Welcome page min-height fix ─────────────────────── */
+
+    .welcome-page {
+        min-height: auto;
+        padding-bottom: 0;
+    }
+
+    /* ── General spacing helpers ─────────────────────────── */
+
+    .mt22 { margin-top: 16px; }
+    .mt18 { margin-top: 14px; margin-bottom: 14px; }
+    .mt16 { margin-top: 12px; }
+
+    /* ── Ingredients list ─────────────────────────────────── */
+
+    .ingredients {
+        gap: 6px;
+    }
+
+    .ingredients li {
+        padding: 7px 10px;
+        font-size: 0.9rem;
+    }
+
+    /* ── Ingredient row in add form ───────────────────────── */
+
+    .ingredient-row {
+        flex-direction: column;
+    }
+
+    .ingredient-row .input {
+        min-width: 0;
+        width: 100%;
+    }
+
+    /* ── Drop/upload zone ─────────────────────────────────── */
+
+    .drop {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .drop .preview {
+        width: 100%;
+        height: 120px;
+    }
+
+    /* ── Blog ─────────────────────────────────────────────── */
+
+    .blog-form,
+    .blog-comment-form {
+        gap: 8px;
+    }
+
+}
+
+/* ============================================================
+   RESPONSIVE — 768 px (tablet) and 1440 px (wide desktop)
+   Add at the END of style.css, AFTER mobile-425.css import
+   ============================================================ */
+
+
+/* ============================================================
+   768 px — Tablet
+   ============================================================ */
+
+@media (min-width: 426px) and (max-width: 768px) {
+
+    /* ── Topbar ───────────────────────────────────────────── */
 
     .topbar .container {
-        padding-top: 8px;
-        padding-bottom: 8px;
+        flex-wrap: wrap;
+        min-height: auto;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        gap: 8px;
     }
 
-    .nav { width: 100%; }
-
-    .hero { padding: 16px; }
-
-    .search-panel {
-        padding: 16px;
+    .logotext {
+        font-size: 20px;
     }
+
+    .nav {
+        width: 100%;
+        gap: 4px;
+        flex-wrap: wrap;
+    }
+
+    .nav > a:not(.btn) {
+        font-size: 0.88rem;
+        padding: 6px 9px;
+    }
+
+    /* ── Page / Container ─────────────────────────────────── */
+
+    .page {
+        padding: 16px 20px 24px;
+    }
+
+    .container,
+    .page {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    /* ── Ad banner ────────────────────────────────────────── */
+
+    .ad-banner img {
+        height: clamp(80px, 14vw, 120px);
+    }
+
+    /* ── Search ───────────────────────────────────────────── */
 
     .search-controls {
-        width: 100%;
-        align-items: stretch;
+        flex-wrap: wrap;
     }
 
     .search-input {
-        min-width: 100%;
+        flex: 1;
+        min-width: 200px;
     }
 
-    .toolbar-form {
-        width: 100%;
+    /* ── Cards grid — 2 колонки ───────────────────────────── */
+
+    .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
     }
 
-    .toolbar-select {
-        min-width: 100%;
+    .cocktail {
+        grid-column: span 1 !important;
     }
 
-    .toolbar-switch {
-        width: 100%;
+    /* Широкий span для пустого состояния */
+    .card[style*="grid-column: span 12"] {
+        grid-column: span 2 !important;
     }
+
+    .cards-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .cards-row .cocktail {
+        grid-column: span 1;
+    }
+
+    /* Если нечётное кол-во — последняя карточка на всю ширину */
+    .cards-row .cocktail:last-child:nth-child(odd) {
+        grid-column: span 2;
+    }
+
+    /* ── Cocktail media height ────────────────────────────── */
+
+    .media {
+        height: 180px;
+    }
+
+    /* ── Cocktail detail page ─────────────────────────────── */
 
     .detail-layout {
+        flex-wrap: wrap;
         gap: 16px;
     }
 
     .detail-media-column {
         width: 100%;
-        flex-basis: 100%;
+        flex: 0 0 100%;
     }
 
     .detail-media {
-        height: clamp(240px, 64vw, 360px);
-        padding: 12px;
+        height: clamp(220px, 40vw, 340px);
     }
 
-    .table,
-    .table tbody,
-    .table tr,
-    .table td,
-    .table th {
-        display: block;
+    .detail-content {
+        min-width: 0;
         width: 100%;
     }
 
-    .table thead { display: none; }
+    /* ── Hero ─────────────────────────────────────────────── */
 
-    .table tr { border-bottom: 1px solid var(--line); }
+    .hero {
+        padding: 16px;
+    }
 
+    /* ── Panel / Card padding ─────────────────────────────── */
+
+    .panel,
+    .p20,
+    .card.p20 {
+        padding: 16px;
+    }
+
+    /* ── Bartenders table ─────────────────────────────────── */
+
+    .table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table th,
     .table td {
         padding: 9px 10px;
-        border-bottom: none;
     }
-}
 
-@media (max-width: 560px) {
-    .cocktail { grid-column: span 12; }
+    /* ── Footer ───────────────────────────────────────────── */
+
+    .footer-inner {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .footer-about {
+        max-width: 100%;
+    }
+
+    .footer-links {
+        max-width: 100%;
+        justify-content: flex-start;
+        gap: 6px 14px;
+    }
+
+    /* ── Form container ───────────────────────────────────── */
+
+    .form-container {
+        width: min(460px, calc(100% - 40px));
+    }
+
+    /* ── Drop zone ────────────────────────────────────────── */
+
+    .drop .preview {
+        width: 110px;
+        height: 70px;
+    }
+
+    /* ── Welcome page ─────────────────────────────────────── */
 
     .welcome-page {
-        min-height: calc(100vh - 62px);
+        min-height: auto;
     }
 
-    .welcome-page .cards {
-        margin-bottom: 16px;
+}
+
+
+/* ============================================================
+   1440 px — Wide Desktop
+   ============================================================ */
+
+@media (min-width: 1440px) {
+
+    /* ── Expand max-width ─────────────────────────────────── */
+
+    :root {
+        --max-width: 1360px;
     }
+
+    /* ── Topbar ───────────────────────────────────────────── */
+
+    .topbar .container {
+        min-height: 70px;
+    }
+
+    .logotext {
+        font-size: 26px;
+    }
+
+    .nav > a:not(.btn) {
+        font-size: 0.96rem;
+        padding: 8px 12px;
+    }
+
+    /* ── Cards grid — 4 колонки ───────────────────────────── */
+
+    .cards {
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    /* По умолчанию span 3 вместо span 4 → 4 в ряд */
+    .cocktail {
+        grid-column: span 3;
+    }
+
+    /* Строки featured (Trending / Best) — 4 в ряд */
+    .cards-row {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .cards-row .cocktail {
+        grid-column: span 1;
+    }
+
+    /* ── Cocktail card image ──────────────────────────────── */
+
+    .media {
+        height: 200px;
+    }
+
+    /* ── Ad banner ────────────────────────────────────────── */
+
+    .ad-banner img {
+        height: clamp(100px, 9vw, 160px);
+    }
+
+    /* ── Hero ─────────────────────────────────────────────── */
+
+    .hero {
+        padding: 26px 28px;
+        margin-top: 20px;
+    }
+
+    /* ── Panel / Card ─────────────────────────────────────── */
+
+    .panel,
+    .p20,
+    .card.p20 {
+        padding: 24px;
+    }
+
+    /* ── Cocktail detail — крупнее медиа ──────────────────── */
+
+    .detail-media-column {
+        width: min(440px, 100%);
+        flex: 0 0 min(440px, 100%);
+    }
+
+    .detail-media {
+        height: clamp(320px, 30vw, 480px);
+    }
+
+    /* ── Bartenders table ─────────────────────────────────── */
+
+    .table th,
+    .table td {
+        padding: 13px 14px;
+    }
+
+    .table th {
+        font-size: 0.8rem;
+    }
+
+    /* ── Search ───────────────────────────────────────────── */
+
+    .search-panel {
+        padding: 22px;
+    }
+
+    .search-input {
+        min-width: 320px;
+    }
+
+    /* ── Section head ─────────────────────────────────────── */
+
+    .section-head {
+        margin-bottom: 4px;
+    }
+
+    /* ── Footer ───────────────────────────────────────────── */
+
+    .site-footer {
+        padding: 32px 20px;
+    }
+
+    .footer-about {
+        max-width: 480px;
+    }
+
+    .footer-links {
+        gap: 8px 18px;
+    }
+
+    /* ── Typography ───────────────────────────────────────── */
+
+    h1 {
+        font-size: 2.1rem;
+    }
+
+    h2 {
+        font-size: 1.4rem;
+    }
+
+    /* ── Spacing helpers ──────────────────────────────────── */
+
+    .mt22 { margin-top: 26px; }
+    .mt18 { margin-top: 22px; margin-bottom: 22px; }
+
+    /* ── Form container ───────────────────────────────────── */
+
+    .form-container {
+        width: min(460px, calc(100% - 40px));
+        padding: 28px;
+    }
+
 }

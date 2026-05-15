@@ -5,14 +5,15 @@
 <head>
     <title>CocktailHub</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
 
 <div class="topbar">
     <div class="container row space">
         <a class="brand" href="${pageContext.request.contextPath}/welcome">
-            <span class="logo"></span>
-            <span>CocktailHub</span>
+            <img src="${pageContext.request.contextPath}/images/logo.svg" alt="CocktailHub" class="logo">
+            <span class="logotext">CocktailHub</span>
         </a>
 
         <div class="nav row">
@@ -63,64 +64,160 @@
         </form>
     </div>
 
-    <div class="cards">
-        <c:if test="${empty cocktailList}">
-            <div class="card p20" style="grid-column: span 12;">
-                <div class="muted">
-                    <c:choose>
-                        <c:when test="${searchPerformed}">No cocktails found for your search.</c:when>
-                        <c:otherwise>No cocktails yet.</c:otherwise>
-                    </c:choose>
-                </div>
+    <c:if test="${showFeaturedRows and not empty trendingCocktails}">
+        <section class="cocktail-section">
+            <div class="section-head">
+                <h2>Trending</h2>
+                <span class="small">Most 4-5 star ratings this month</span>
             </div>
-        </c:if>
+            <div class="cards cards-row">
+                <c:forEach var="cocktail" items="${trendingCocktails}">
+                    <div class="card cocktail">
+                        <a href="${pageContext.request.contextPath}/view?id=${cocktail.id}">
+                            <div class="media">
+                                <c:choose>
+                                    <c:when test="${not empty cocktail.imagePath}">
+                                        <img src="${pageContext.request.contextPath}${cocktail.imagePath}" alt="Cocktail photo">
+                                    </c:when>
+                                    <c:otherwise>
+                                        <img alt="Default cocktail" src="data:image/svg+xml;utf8,
+                                             <svg xmlns='http://www.w3.org/2000/svg' width='1200' height='700'>
+                                               <rect width='1200' height='700' fill='%23f7f9fb'/>
+                                               <rect x='1' y='1' width='1198' height='698' fill='none' stroke='%23d9dfe6' stroke-width='2'/>
+                                               <text x='70' y='610' font-family='Verdana' font-size='64' fill='%23111111'>CocktailHub</text>
+                                               <text x='70' y='670' font-family='Verdana' font-size='34' fill='%23626a73'>No photo uploaded</text>
+                                             </svg>">
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
 
-        <c:forEach var="cocktail" items="${cocktailList}">
-            <div class="card cocktail">
-                <a href="${pageContext.request.contextPath}/view?id=${cocktail.id}">
-                    <div class="media">
+                            <div class="content">
+                                <div class="title"><c:out value="${cocktail.name}"/></div>
+                                <div class="desc"><c:out value="${cocktail.description}"/></div>
+                                <div class="meta">
+                                    <span class="card-rating">
+                                        <span class="star-rating" aria-label="Rating ${ratings[cocktail.id]} out of 5">
+                                            <c:forEach var="star" items="${ratingStars[cocktail.id]}">
+                                                <span class="rating-star ${star}">&#9733;</span>
+                                            </c:forEach>
+                                        </span>
+                                        <span class="rating-number">${ratings[cocktail.id]}</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </c:forEach>
+            </div>
+        </section>
+    </c:if>
+
+    <c:if test="${showFeaturedRows and not empty weeklyBestCocktails}">
+        <section class="cocktail-section">
+            <div class="section-head">
+                <h2>Best This Week</h2>
+                <span class="small">Highest rated cocktails created this week</span>
+            </div>
+            <div class="cards cards-row">
+                <c:forEach var="cocktail" items="${weeklyBestCocktails}">
+                    <div class="card cocktail">
+                        <a href="${pageContext.request.contextPath}/view?id=${cocktail.id}">
+                            <div class="media">
+                                <c:choose>
+                                    <c:when test="${not empty cocktail.imagePath}">
+                                        <img src="${pageContext.request.contextPath}${cocktail.imagePath}" alt="Cocktail photo">
+                                    </c:when>
+                                    <c:otherwise>
+                                        <img alt="Default cocktail" src="data:image/svg+xml;utf8,
+                                             <svg xmlns='http://www.w3.org/2000/svg' width='1200' height='700'>
+                                               <rect width='1200' height='700' fill='%23f7f9fb'/>
+                                               <rect x='1' y='1' width='1198' height='698' fill='none' stroke='%23d9dfe6' stroke-width='2'/>
+                                               <text x='70' y='610' font-family='Verdana' font-size='64' fill='%23111111'>CocktailHub</text>
+                                               <text x='70' y='670' font-family='Verdana' font-size='34' fill='%23626a73'>No photo uploaded</text>
+                                             </svg>">
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
+
+                            <div class="content">
+                                <div class="title"><c:out value="${cocktail.name}"/></div>
+                                <div class="desc"><c:out value="${cocktail.description}"/></div>
+                                <div class="meta">
+                                    <span class="card-rating">
+                                        <span class="star-rating" aria-label="Rating ${ratings[cocktail.id]} out of 5">
+                                            <c:forEach var="star" items="${ratingStars[cocktail.id]}">
+                                                <span class="rating-star ${star}">&#9733;</span>
+                                            </c:forEach>
+                                        </span>
+                                        <span class="rating-number">${ratings[cocktail.id]}</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </c:forEach>
+            </div>
+        </section>
+    </c:if>
+
+    <section class="cocktail-section">
+        <div class="section-head">
+            <h2>All Cocktails</h2>
+            <span class="small">${empty cocktailList ? 0 : cocktailList.size()} recipes</span>
+        </div>
+
+        <div class="cards">
+            <c:if test="${empty cocktailList}">
+                <div class="card p20" style="grid-column: span 12;">
+                    <div class="muted">
                         <c:choose>
-                            <c:when test="${not empty cocktail.imagePath}">
-                                <img src="${pageContext.request.contextPath}${cocktail.imagePath}" alt="Cocktail photo">
-                            </c:when>
-                            <c:otherwise>
-                                <img alt="Default cocktail" src="data:image/svg+xml;utf8,
-                                     <svg xmlns='http://www.w3.org/2000/svg' width='1200' height='700'>
-                                       <defs>
-                                         <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
-                                           <stop offset='0' stop-color='%23d97706' stop-opacity='.24'/>
-                                           <stop offset='1' stop-color='%230f766e' stop-opacity='.20'/>
-                                         </linearGradient>
-                                       </defs>
-                                       <rect width='1200' height='700' fill='%23f9f3e7'/>
-                                       <rect width='1200' height='700' fill='url(%23g)'/>
-                                       <circle cx='920' cy='220' r='190' fill='%23ffffff' opacity='.55'/>
-                                       <circle cx='960' cy='260' r='190' fill='%23ffffff' opacity='.35'/>
-                                       <text x='70' y='610' font-family='Verdana' font-size='64' fill='%231f1d1a' opacity='.68'>CocktailHub</text>
-                                       <text x='70' y='670' font-family='Verdana' font-size='34' fill='%231f1d1a' opacity='.48'>No photo uploaded</text>
-                                     </svg>">
-                            </c:otherwise>
+                            <c:when test="${searchPerformed}">No cocktails found for your search.</c:when>
+                            <c:otherwise>No cocktails yet.</c:otherwise>
                         </c:choose>
                     </div>
+                </div>
+            </c:if>
 
-                    <div class="content">
-                        <div class="title"><c:out value="${cocktail.name}"/></div>
-                        <div class="desc"><c:out value="${cocktail.description}"/></div>
-
-                        <div class="meta">
-                            <span class="card-rating">
-                                <span class="star-rating" aria-label="Rating ${ratings[cocktail.id]} out of 5">
-                                    <span class="star-base">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
-                                    <span class="star-fill" style="width: ${ratingStarWidths[cocktail.id]}">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
-                                </span>
-                                <span class="rating-number">${ratings[cocktail.id]}</span>
-                            </span>
+            <c:forEach var="cocktail" items="${cocktailList}">
+                <div class="card cocktail">
+                    <a href="${pageContext.request.contextPath}/view?id=${cocktail.id}">
+                        <div class="media">
+                            <c:choose>
+                                <c:when test="${not empty cocktail.imagePath}">
+                                    <img src="${pageContext.request.contextPath}${cocktail.imagePath}" alt="Cocktail photo">
+                                </c:when>
+                                <c:otherwise>
+                                    <img alt="Default cocktail" src="data:image/svg+xml;utf8,
+                                         <svg xmlns='http://www.w3.org/2000/svg' width='1200' height='700'>
+                                           <rect width='1200' height='700' fill='%23f7f9fb'/>
+                                           <rect x='1' y='1' width='1198' height='698' fill='none' stroke='%23d9dfe6' stroke-width='2'/>
+                                           <text x='70' y='610' font-family='Verdana' font-size='64' fill='%23111111'>CocktailHub</text>
+                                           <text x='70' y='670' font-family='Verdana' font-size='34' fill='%23626a73'>No photo uploaded</text>
+                                         </svg>">
+                                </c:otherwise>
+                            </c:choose>
                         </div>
-                    </div>
-                </a>
-            </div>
-        </c:forEach>
-    </div>
+
+                        <div class="content">
+                            <div class="title"><c:out value="${cocktail.name}"/></div>
+                            <div class="desc"><c:out value="${cocktail.description}"/></div>
+
+                            <div class="meta">
+                                <span class="card-rating">
+                                    <span class="star-rating" aria-label="Rating ${ratings[cocktail.id]} out of 5">
+                                        <c:forEach var="star" items="${ratingStars[cocktail.id]}">
+                                            <span class="rating-star ${star}">&#9733;</span>
+                                        </c:forEach>
+                                    </span>
+                                    <span class="rating-number">${ratings[cocktail.id]}</span>
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </c:forEach>
+        </div>
+    </section>
 </div>
 
 <footer class="site-footer">

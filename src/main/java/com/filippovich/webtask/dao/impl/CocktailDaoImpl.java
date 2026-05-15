@@ -16,21 +16,24 @@ import java.util.Optional;
 public class CocktailDaoImpl implements CocktailDao {
 
     private static final String SQL_FIND_BY_ID = """
-        SELECT id, name, description, status, author_id, created_at, image_path
-        FROM cocktails
-        WHERE id = ?
-    """;
+    SELECT c.id, c.name, c.description, c.status, c.author_id, c.created_at, c.image_path, u.username AS author_name
+    FROM cocktails c
+    LEFT JOIN users u ON c.author_id = u.id
+    WHERE c.id = ?
+""";
 
     private static final String SQL_FIND_ALL = """
-        SELECT id, name, description, status, author_id, created_at, image_path
-        FROM cocktails
-    """;
+    SELECT c.id, c.name, c.description, c.status, c.author_id, c.created_at, c.image_path, u.username AS author_name
+    FROM cocktails c
+    LEFT JOIN users u ON c.author_id = u.id
+""";
 
     private static final String SQL_FIND_BY_STATUS = """
-        SELECT id, name, description, status, author_id, created_at, image_path
-        FROM cocktails
-        WHERE status = ?
-    """;
+    SELECT c.id, c.name, c.description, c.status, c.author_id, c.created_at, c.image_path, u.username AS author_name
+    FROM cocktails c
+    LEFT JOIN users u ON c.author_id = u.id
+    WHERE c.status = ?
+""";
 
     private static final String SQL_FIND_AUTHOR_NAME_BY_ID = """
         SELECT username
@@ -231,11 +234,12 @@ public class CocktailDaoImpl implements CocktailDao {
 
     public List<Cocktail> findByAuthorId(long authorId) throws DaoException {
         String sql = """
-        SELECT id, name, description, status, author_id, created_at, image_path
-        FROM cocktails
-        WHERE author_id = ?
-        ORDER BY created_at DESC
-    """;
+    SELECT c.id, c.name, c.description, c.status, c.author_id, c.created_at, c.image_path, u.username AS author_name
+    FROM cocktails c
+    LEFT JOIN users u ON c.author_id = u.id
+    WHERE c.author_id = ?
+    ORDER BY c.created_at DESC
+""";
 
         List<Cocktail> list = new ArrayList<>();
         try (Connection c = dataSource.getConnection();
@@ -318,6 +322,7 @@ public class CocktailDaoImpl implements CocktailDao {
 
         User author = new User();
         author.setId(resultSet.getLong("author_id"));
+        author.setUsername(resultSet.getString("author_name"));
         cocktail.setAuthor(author);
 
         Timestamp ts = resultSet.getTimestamp("created_at");

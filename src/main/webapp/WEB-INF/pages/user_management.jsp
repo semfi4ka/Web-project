@@ -3,6 +3,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Management</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 </head>
@@ -11,8 +12,8 @@
 <div class="topbar">
     <div class="container row space">
         <a class="brand" href="${pageContext.request.contextPath}/welcome">
-            <span class="logo"></span>
-            <span>CocktailHub</span>
+            <img src="${pageContext.request.contextPath}/images/logo.svg" alt="CocktailHub" class="logo">
+            <span class="logotext">CocktailHub</span>
         </a>
 
         <div class="nav row">
@@ -58,7 +59,11 @@
 
             <c:forEach var="user" items="${userList}">
                 <tr>
-                    <td>${user.username}</td>
+                    <td>
+                        <a class="profile-link" href="${pageContext.request.contextPath}/profile?userId=${user.id}">
+                            <c:out value="${user.username}"/>
+                        </a>
+                    </td>
                     <td>${user.email}</td>
                     <td><span class="badge">${user.role}</span></td>
                     <td>${user.cocktailCount}</td>
